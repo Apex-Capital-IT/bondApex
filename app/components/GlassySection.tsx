@@ -26,40 +26,13 @@ export default function GlassySection() {
     }
   }, [isInView]);
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 100 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut",
-        staggerChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-      },
-    },
-  };
-
   return (
-    <motion.div
+    <div
       ref={sectionRef}
       className="min-h-screen relative bg-container bg-no-repeat bg-right-bottom"
       style={{
         backgroundImage: "url('/coin.png')",
       }}
-      variants={containerVariants}
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
     >
       {/* Overlay for better text visibility */}
 
@@ -67,24 +40,20 @@ export default function GlassySection() {
       <div className="container mx-auto px-4 py-16  relative z-10">
         <div className="flex flex-col items-center mt-[200px] gap-12">
           {/* Top Content */}
-          <motion.div
-            className="text-center text-black/80"
-            variants={itemVariants}
-          >
+          <div className="text-center text-black/80">
             <h1 className="text-6xl font-bold mb-6">Apex capital</h1>
             <p className="text-xl text-black/70 mb-8">
               Дээр арилжаалагдаж буй богино хугацаат бондын төрлүүд
             </p>
-          </motion.div>
+          </div>
 
           {/* Cards Section */}
-          <motion.div className="w-full max-w-4xl" variants={itemVariants}>
+          <div className="w-full max-w-4xl">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Card 1 - Bond 1 */}
               <Link href="/bond/1">
                 <motion.div
                   className="p-6 rounded-2xl bg-white/10 backdrop-blur-2xl border border-white/30 shadow-xl"
-                  variants={itemVariants}
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
                 >
@@ -143,7 +112,6 @@ export default function GlassySection() {
               <Link href="/bond/2">
                 <motion.div
                   className="p-6 rounded-2xl bg-white/10 backdrop-blur-2xl border border-white/30 shadow-xl"
-                  variants={itemVariants}
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
                 >
@@ -202,7 +170,6 @@ export default function GlassySection() {
               <Link href="/bond/3">
                 <motion.div
                   className="p-6 rounded-2xl bg-white/10 backdrop-blur-2xl border border-white/30 shadow-xl"
-                  variants={itemVariants}
                   whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.2 }}
                 >
@@ -257,9 +224,9 @@ export default function GlassySection() {
                 </motion.div>
               </Link>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

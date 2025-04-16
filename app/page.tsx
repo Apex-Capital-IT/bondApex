@@ -7,7 +7,6 @@ import { ArrowRight } from "lucide-react";
 import GlassySection from "./components/GlassySection";
 import { Anton } from "next/font/google";
 import { useEffect, useState } from "react";
-import Footer from "@/components/ui/footer";
 import SocialLinks from "@/components/ui/social-links";
 
 const anton = Anton({
@@ -18,6 +17,7 @@ const anton = Anton({
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,6 +57,50 @@ export default function Home() {
             />
           </motion.div>
 
+          {/* Mobile menu button - only visible on small screens */}
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="md:hidden text-black p-2 rounded-md"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-x"
+              >
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-menu"
+              >
+                <line x1="4" x2="20" y1="12" y2="12" />
+                <line x1="4" x2="20" y1="6" y2="6" />
+                <line x1="4" x2="20" y1="18" y2="18" />
+              </svg>
+            )}
+          </motion.button>
+
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -69,7 +113,7 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <Link
-                href="#"
+                href="https://www.facebook.com/apexcapital.mn"
                 className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl border border-white/30 text-black/70 transition-all shadow-lg"
               >
                 Contact us{" "}
@@ -81,7 +125,7 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <Link
-                href="#"
+                href="coming-soon"
                 className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl border border-white/30 text-black/70 transition-all shadow-lg"
               >
                 For business
@@ -93,7 +137,7 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <Link
-                href="#"
+                href="https://www.facebook.com/apexcapital.mn"
                 className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl border border-white/30 text-black/70 transition-all shadow-lg"
               >
                 About us
@@ -105,7 +149,7 @@ export default function Home() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex space-x-3"
+            className="hidden md:flex space-x-3"
           >
             <motion.div
               whileHover={{ scale: 1.05, rotate: 0 }}
@@ -113,7 +157,7 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <Link
-                href="/signup"
+                href="/coming-soon"
                 className="px-4 py-2 rounded-full font-medium bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl border border-white/30 text-black/70 transition-all shadow-lg"
               >
                 Бүртгүүлэх
@@ -125,7 +169,7 @@ export default function Home() {
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <Link
-                href="/login"
+                href="/coming-soon"
                 className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl border border-white/30 text-black/70 transition-all shadow-lg"
               >
                 Нэвтрэх
@@ -133,6 +177,57 @@ export default function Home() {
             </motion.div>
           </motion.div>
         </nav>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed top-[80px] left-0 right-0 bg-white/95 backdrop-blur-md z-40 shadow-lg"
+          >
+            <div className="flex flex-col items-center space-y-4 py-6">
+              <Link
+                href="https://www.facebook.com/apexcapital.mn"
+                className="px-4 py-2 w-4/5 text-center rounded-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl border border-white/30 text-black/70 transition-all shadow-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Contact us
+              </Link>
+              <Link
+                href="coming-soon"
+                className="px-4 py-2 w-4/5 text-center rounded-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl border border-white/30 text-black/70 transition-all shadow-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                For business
+              </Link>
+              <Link
+                href="https://www.facebook.com/apexcapital.mn"
+                className="px-4 py-2 w-4/5 text-center rounded-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl border border-white/30 text-black/70 transition-all shadow-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                About us
+              </Link>
+              <div className="flex flex-col space-y-3 w-4/5">
+                <Link
+                  href="/coming-soon"
+                  className="px-4 py-2 text-center rounded-full font-medium bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl border border-white/30 text-black/70 transition-all shadow-lg"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Бүртгүүлэх
+                </Link>
+                <Link
+                  href="/coming-soon"
+                  className="px-4 py-2 text-center rounded-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl border border-white/30 text-black/70 transition-all shadow-lg"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Нэвтрэх
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Main Content */}
         <main className="flex-1">
@@ -143,14 +238,15 @@ export default function Home() {
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.7, delay: 0.5 }}
-                className="relative text-black text-6xl md:text-6xl font-bold leading-tight pl-[600px] md:pl-[700px]"
+                className="relative text-black text-6xl md:text-6xl font-bold leading-tight px-6 md:pl-[700px]"
               >
-                <div className="relative z-10 p-8 rounded-2xl">
-                  <div className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500/40 to-yellow-500/40 font-[var(--font-anton)] text-7xl tracking-wider">
+                <div className="relative z-20 p-4 md:p-8 rounded-2xl">
+                  <div className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500/40 to-yellow-500/40 font-[var(--font-anton)] text-4xl md:text-7xl tracking-wider">
                     Хугацаа бага, боломж их.{" "}
                   </div>
-                  <div className="text-black/80 text-xl mt-4 font-medium">
-                    Apex Capital богино хугацаат бонд
+                  <div className="text-black/80 text-base md:text-xl mt-4 font-medium">
+                    Санхүүгийн хэрэглээндээ тохируулан богино хугацаанд уян
+                    хатан бондод хөрөнгө оруулах боломж.
                   </div>
                 </div>
               </motion.div>
@@ -164,14 +260,14 @@ export default function Home() {
                 type: "spring",
                 stiffness: 100,
               }}
-              className="z-10 w-full h-[667px] items-start max-w-xl"
+              className="z-10 w-full flex justify-end h-screen items-end max-w-xl"
             >
               <Image
                 src="Apex.png"
                 alt="Hydrogen Bond"
                 width={800}
                 height={667}
-                className="w-full h-[100vh]"
+                className="w-full h-[60vh] md:h-[80vh] object-contain"
                 priority
               />
             </motion.div>
@@ -182,14 +278,14 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 1.3 }}
-            className="absolute bottom-[40px] left-[47%] -translate-x-1/2"
+            className="absolute bottom-[40px] z-20 left-1/2 md:left-[47%] -translate-x-1/2"
           >
             <motion.div
               whileHover={{ scale: 1.05, rotate: 0 }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              <button className="bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl border border-white/30 text-black/70 px-8 py-3 rounded-full flex items-center gap-3 hover:bg-white/30 transition-all shadow-lg">
+              <button className="bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl border border-white/30 text-black/70 px-6 md:px-8 py-2 md:py-3 rounded-full flex items-center gap-3 hover:bg-white/30 transition-all shadow-lg">
                 <Link href="/detail">
                   <span>Дэлгэрэнгүй</span>
                 </Link>

@@ -37,7 +37,7 @@ export default function DetailPage() {
 
       {/* Main Content */}
       <main className="relative z-10 pt-32 px-6 md:px-28">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mb-12 mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -66,6 +66,8 @@ export default function DetailPage() {
                 <p className="text-black/80">
                   Богино хугацаат бонд нь хөрөнгө оруулагчдад богино хугацаанд
                   өндөр өгөөж олох боломжийг олгодог санхүүгийн хэрэгсэл юм.
+                  <li>Хүү – 15.0%-19.0%</li>
+                  <li>Хугацаа – 1 сараас 11 сар хүртэлх </li>
                 </p>
               </div>
             </div>
@@ -76,29 +78,36 @@ export default function DetailPage() {
                   Давуу талууд
                 </h2>
                 <ul className="space-y-4 text-black/80">
-                  <li>• Богино хугацаанд өндөр өгөөж</li>
-                  <li>• Тогтвортой орлого</li>
-                  <li>• Бага эрсдэл</li>
-                  <li>• Уян хатан хөрөнгө оруулалт</li>
+                  <li>
+                    • Хүссэн үедээ буцаан худалдах боломжтой хөрвөх чадвар өндөр{" "}
+                  </li>
+                  <li>
+                    • Богино хугацаанд ашиглахаар төлөвлөсөн хөрөнгөө үр
+                    өгөөжтэй байршуулах{" "}
+                  </li>
+                  <li>• Мөнгөн урсгалын оновчтой удирдлага </li>
                 </ul>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-xl p-8 rounded-2xl border-2 mb-[200px] border-gradient-to-r from-blue-500/40 to-yellow-500/40">
+            <div className="bg-white/10 backdrop-blur-xl p-8 rounded-2xl border-2 border-gradient-to-r from-blue-500/40 to-yellow-500/40">
               <div className="relative">
-                <h2 className="text-2xl font-bold mb-4 text-black/90">
-                  Хэрхэн хөрөнгө оруулах вэ?
-                </h2>
-                <p className="text-black/80 mb-4">
-                  Apex Capital-ийн богино хугацаат бондод хөрөнгө оруулахын тулд
-                  дараах алхмуудыг дагана уу:
-                </p>
-                <ol className="space-y-4 text-black/80">
-                  <li>1. Бүртгүүлэх эсвэл нэвтрэх</li>
-                  <li>2. Хөрөнгө оруулалтын хэмжээгээ сонгох</li>
-                  <li>3. Бондын хугацааг сонгох</li>
-                  <li>4. Хөрөнгө оруулалт хийх</li>
-                </ol>
+                <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+                  <a
+                    href="https://www.facebook.com/apexcapital.mn"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full sm:w-auto px-6 py-3 text-center text-sm sm:text-base bg-gradient-to-r from-blue-500/40 to-yellow-500/40 text-white rounded-lg transition-colors"
+                  >
+                    Мэдээлэл авах
+                  </a>
+                  <a
+                    href="tel:75107500"
+                    className="w-full sm:w-auto px-6 py-3 text-center text-sm sm:text-base bg-gradient-to-r from-blue-500/40 to-yellow-500/40 text-white rounded-lg transition-colors"
+                  >
+                    Холбогдох
+                  </a>
+                </div>
               </div>
             </div>
           </motion.div>
