@@ -1,37 +1,26 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { Alfa_Slab_One, Dela_Gothic_One, Rubik_Doodle_Shadow, Special_Elite, Vollkorn } from "next/font/google";
+import { Inter, Montserrat } from "next/font/google";
+import { Alfa_Slab_One, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
-const alfaSlabOne = Alfa_Slab_One({ 
-  weight: "400",
+
+const montserrat = Montserrat({
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   subsets: ["latin"],
-  variable: "--font-alfa-slab-one"
+  variable: "--font-montserrat",
 });
 
-const delaGothicOne = Dela_Gothic_One({ 
-  weight: "400",
+const alfaSlabOne = Alfa_Slab_One({
+  weight: ["400"],
   subsets: ["latin"],
-  variable: "--font-dela-gothic-one"
+  variable: "--font-alfa-slab-one",
 });
 
-const rubikDoodleShadow = Rubik_Doodle_Shadow({ 
-  weight: "400",
+const cormorantGaramond = Cormorant_Garamond({
+  weight: ["300", "400", "500", "600", "700"],
   subsets: ["latin"],
-  variable: "--font-rubik-doodle-shadow"
-});
-
-const specialElite = Special_Elite({ 
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-special-elite"
-});
-
-const vollkorn = Vollkorn({ 
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-vollkorn"
+  variable: "--font-cormorant-garamond",
 });
 
 export const metadata: Metadata = {
@@ -46,7 +35,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} ${alfaSlabOne.variable} ${delaGothicOne.variable} ${rubikDoodleShadow.variable} ${specialElite.variable} ${vollkorn.variable}`}>
+      <body
+        className={`${inter.className} ${montserrat.variable} ${alfaSlabOne.variable} ${cormorantGaramond.variable} `}
+      >
         {children}
       </body>
     </html>

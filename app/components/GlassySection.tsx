@@ -29,7 +29,7 @@ export default function GlassySection() {
   return (
     <div
       ref={sectionRef}
-      className="min-h-screen relative bg-container bg-no-repeat bg-right-bottom"
+      className="min-h-screen  relative bg-container bg-no-repeat bg-right-bottom"
       style={{
         backgroundImage: "url('/coin.png')",
       }}
@@ -41,14 +41,14 @@ export default function GlassySection() {
         <div className="flex flex-col items-center mt-[200px] gap-12">
           {/* Top Content */}
           <div className="text-center text-black/80">
-            <h1 className="text-6xl font-bold mb-6">Apex capital</h1>
-            <p className="text-xl text-black/70 mb-8">
+            <h1 className="text-7xl font-bold mb-6">Apex capital</h1>
+            <p className="text-2xl text-black/70 font-bold font-['Cormorant_Garamond'] mb-8">
               Дээр арилжаалагдаж буй богино хугацаат бондын төрлүүд
             </p>
           </div>
 
           {/* Cards Section */}
-          <div className="w-full max-w-4xl">
+          <div className="w-full font-['Cormorant_Garamond']  max-w-4xl">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Card 1 - Bond 1 */}
               <Link href="/bond/1">
@@ -76,10 +76,10 @@ export default function GlassySection() {
                       </text>
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-black/70 mb-4">
+                  <h3 className="text-xl font-bold text-black/70 mb-4">
                     Бонд-1
                   </h3>
-                  <div className="space-y-2 text-black/80">
+                  <div className="space-y-2 font-semibold text-black/80">
                     <p className="flex justify-between">
                       <span>Төрөл:</span>
                       <span className="font-medium">Хаалттай</span>
@@ -134,10 +134,10 @@ export default function GlassySection() {
                       </text>
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-black/70 mb-4">
+                  <h3 className="text-xl font-bold text-black/70 mb-4">
                     Бонд-2
                   </h3>
-                  <div className="space-y-2 text-black/80">
+                  <div className="space-y-2 font-semibold text-black/80">
                     <p className="flex justify-between">
                       <span>Төрөл:</span>
                       <span className="font-medium">Хаалттай</span>
@@ -192,10 +192,10 @@ export default function GlassySection() {
                       </text>
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-black/70 mb-4">
+                  <h3 className="text-xl font-bold text-black/70 mb-4">
                     Бонд-3
                   </h3>
-                  <div className="space-y-2 text-black/80">
+                  <div className="space-y-2 font-semibold text-black/80">
                     <p className="flex justify-between">
                       <span>Төрөл:</span>
                       <span className="font-medium">Хаалттай</span>
