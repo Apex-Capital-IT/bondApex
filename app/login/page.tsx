@@ -1,51 +1,81 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
 
   const validateEmail = (email: string) => {
     if (!email) {
-      setEmailError("И-мэйл хаяг оруулна уу");
-      return false;
+      return "И-мэйл хаяг оруулна уу";
     }
     if (!email.includes("@")) {
-      setEmailError("И-мэйл хаяг @ тэмдэгт агуулсан байх ёстой");
-      return false;
+      return "И-мэйл хаяг @ тэмдэгт агуулсан байх ёстой";
     }
     if (!email.includes(".")) {
-      setEmailError("И-мэйл хаяг . тэмдэгт агуулсан байх ёстой");
-      return false;
+      return "И-мэйл хаяг . тэмдэгт агуулсан байх ёстой";
     }
-    setEmailError("");
-    return true;
+    return "";
   };
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setEmail(value);
-    if (value) {
-      validateEmail(value);
-    } else {
-      setEmailError("");
+  const validateForm = () => {
+    const newErrors = {
+      email: validateEmail(formData.email),
+      password: !formData.password ? "Нууц үг оруулна уу" : "",
+    };
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some((error) => error);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name as keyof typeof errors]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
-  const handleToggle = () => {
-    if (isLogin) {
-      router.push("/signup");
-    } else {
-      router.push("/login");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    try {
+      const response = await axios.post("/api/login", {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (response.status === 200) {
+        login(response.data.user);
+        router.push("/");
+      }
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        setErrors((prev) => ({
+          ...prev,
+          email: error.response.data.error,
+        }));
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -63,45 +93,27 @@ export default function LoginPage() {
           </Link>
 
           <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold mb-2">
-              {isLogin ? "Нэвтрэх" : <span className="font-[var(--font-alfa-slab-one)]">Бүртгүүлэх</span>}
-            </h1>
-            <p className="text-gray-600">
-              {isLogin
-                ? "Тавтай морилно уу! Нэвтэрч орно уу."
-                : "Шинээр бүртгүүлэх"}
-            </p>
+            <h1 className="text-3xl font-bold mb-2">Нэвтрэх</h1>
+            <p className="text-gray-600">Тавтай морилно уу! Нэвтэрч орно уу.</p>
           </div>
 
-          <form className="space-y-6">
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Нэр
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Нэрээ оруулна уу"
-                />
-              </div>
-            )}
-
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 И-мэйл
               </label>
               <input
-                type=""
-                value={email}
-                onChange={handleEmailChange}
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 className={`w-full px-4 py-2 border ${
-                  emailError ? "border-red-500" : "border-gray-300"
+                  errors.email ? "border-red-500" : "border-gray-300"
                 } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 placeholder="И-мэйл хаягаа оруулна уу"
               />
-              {emailError && (
-                <p className="mt-1 text-sm text-red-600">{emailError}</p>
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
               )}
             </div>
 
@@ -111,52 +123,43 @@ export default function LoginPage() {
               </label>
               <input
                 type="password"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 border ${
+                  errors.password ? "border-red-500" : "border-gray-300"
+                } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 placeholder="Нууц үгээ оруулна уу"
               />
-              {isLogin && (
-                <div className="mt-2 text-right">
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    Нууц үгээ мартсан уу?
-                  </Link>
-                </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
               )}
-            </div>
-
-            {!isLogin && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Нууц үг давтах
-                </label>
-                <input
-                  type="password"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Нууц үгээ дахин оруулна уу"
-                />
+              <div className="mt-2 text-right">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
+                  Нууц үг мартсан уу?
+                </Link>
               </div>
-            )}
+            </div>
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 text-black py-2 px-4 rounded-lg hover:from-blue-500/30 hover:to-yellow-500/30 transition-all"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 text-black py-2 px-4 rounded-lg hover:from-blue-500/30 hover:to-yellow-500/30 transition-all disabled:opacity-50"
             >
-              {isLogin ? "Нэвтрэх" : <span className="font-[var(--font-alfa-slab-one)]">Бүртгүүлэх</span>}
+              {isLoading ? "Түр хүлээнэ үү..." : "Нэвтрэх"}
             </button>
           </form>
 
           <div className="mt-6 text-center">
-            <button
-              onClick={handleToggle}
+            <Link
+              href="/signup"
               className="text-sm text-gray-600 hover:text-gray-900"
             >
-              {isLogin ? "Бүртгэлгүй юу? " : "Бүртгэлтэй юу? "}
-              <span className="font-[var(--font-alfa-slab-one)]">
-                {isLogin ? "Бүртгүүлэх" : "Нэвтрэх"}
-              </span>
-            </button>
+              Бүртгэлгүй юу? Бүртгүүлэх
+            </Link>
           </div>
         </div>
       </div>

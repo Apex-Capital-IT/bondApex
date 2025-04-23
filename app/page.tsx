@@ -9,6 +9,9 @@ import { Anton } from "next/font/google";
 import { useEffect, useState } from "react";
 import SocialLinks from "@/components/ui/social-links";
 import LeftAdSection from "./components/LeftAdSection";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import Navigation from "./components/Navigation";
 
 const anton = Anton({
   weight: "400",
@@ -17,222 +20,20 @@ const anton = Anton({
 });
 
 export default function Home() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const router = useRouter();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 0) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   return (
     <div className="min-h-screen font-['Cormorant_Garamond']  flex flex-col">
       <div
         className={`min-h-screen bg-white text-black overflow-hidden flex flex-col ${anton.variable}`}
       >
-        {/* Navigation */}
-        <nav
-          className={`fixed w-full top-0 z-[9999] flex justify-between items-center p-4 sm:p-6 md:px-28 transition-all duration-300 backdrop-blur-md bg-white md:bg-transparent ${
-            isScrolled ? "md:bg-white/70" : ""
-          }`}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-black text-2xl font-bold"
-          >
-            <Image
-              alt="Hydrogen Bond"
-              width={85}
-              height={85}
-              className="w-[85px] h-auto"
-              src={"/Logo.svg"}
-            />
-          </motion.div>
-
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="md:hidden text-black p-2 rounded-md"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <motion.div
-              animate={{ rotate: mobileMenuOpen ? 90 : 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {mobileMenuOpen ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-x"
-                >
-                  <path d="M18 6 6 18" />
-                  <path d="m6 6 12 12" />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-menu"
-                >
-                  <line x1="4" x2="20" y1="12" y2="12" />
-                  <line x1="4" x2="20" y1="6" y2="6" />
-                  <line x1="4" x2="20" y1="18" y2="18" />
-                </svg>
-              )}
-            </motion.div>
-          </motion.button>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="hidden md:flex items-center space-x-4 lg:space-x-10 text-white"
-          >
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
-              <Link
-                href="https://www.facebook.com/apexcapital.mn"
-                className="px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg"
-              >
-                Contact us{" "}
-              </Link>
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
-              <Link
-                href="coming-soon"
-                className="px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg"
-              >
-                For business
-              </Link>
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
-              <Link
-                href="https://www.facebook.com/apexcapital.mn"
-                className="px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg"
-              >
-                About us
-              </Link>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="hidden md:flex space-x-2 lg:space-x-3"
-          >
-            <motion.div
-              whileHover={{ scale: 1.05, rotate: 0 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
-              <Link
-                href="/coming-soon"
-                className="px-4  py-2  rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg"
-              >
-                Бүртгүүлэх
-              </Link>
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.05, rotate: 0 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-            >
-              <Link
-                href="/coming-soon"
-                className="px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg"
-              >
-                Нэвтрэх
-              </Link>
-            </motion.div>
-          </motion.div>
-        </nav>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed top-[72px] left-0 right-0 bg-white z-50 shadow-lg"
-          >
-            <div className="flex flex-col items-start z-50 space-y-4 py-4">
-              <Link
-                href="https://www.facebook.com/apexcapital.mn"
-                className="py-2 w-full border-b border-gray-200 mx-2 px-4 text-black/70 transition-all"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Contact us
-              </Link>
-              <Link
-                href="coming-soon"
-                className="py-2 w-full border-b border-gray-200 mx-2 px-4 text-black/70 transition-all"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {" "}
-                For business
-              </Link>
-              <Link
-                href="https://www.facebook.com/apexcapital.mn"
-                className="py-2 w-full border-b border-gray-200 mx-2 px-4 text-black/70 transition-all"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                About us
-              </Link>
-              <div className="flex flex-col gap-4 w-full">
-                <Link
-                  href="/coming-soon"
-                  className="py-2 w-fit rounded-2xl border-b border-gray-200 mx-2 px-4 text-black/70 transition-all bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Бүртгүүлэх
-                </Link>
-                <Link
-                  href="/coming-soon"
-                  className="py-2 w-fit rounded-2xl border-b border-gray-200 px-4 mx-2 text-black/70 transition-all bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Нэвтрэх
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-        )}
+        <Navigation />
 
         {/* Main Content */}
         <main className="flex-1">

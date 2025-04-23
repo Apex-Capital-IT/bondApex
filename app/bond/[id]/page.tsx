@@ -5,6 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const bonds = [
   {
@@ -51,6 +54,51 @@ const bonds = [
 export default function BondPage() {
   const params = useParams();
   const bond = bonds.find((b) => b.id === params.id);
+  const [isRequesting, setIsRequesting] = useState(false);
+  const [requestStatus, setRequestStatus] = useState<"idle" | "success" | "error">("idle");
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const handleRequest = async () => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    setIsRequesting(true);
+    setRequestStatus("idle");
+    
+    try {
+      const response = await fetch('/api/bond/request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bondId: bond?.id,
+          bondTitle: bond?.title,
+          timestamp: new Date().toISOString(),
+          userEmail: user.email,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("Request response:", data);
+
+      if (response.ok) {
+        setRequestStatus("success");
+        setRequestId(data.id);
+      } else {
+        setRequestStatus("error");
+      }
+    } catch (error) {
+      console.error("Error submitting request:", error);
+      setRequestStatus("error");
+    } finally {
+      setIsRequesting(false);
+    }
+  };
 
   if (!bond) {
     return (
@@ -121,11 +169,22 @@ export default function BondPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 1 }}
-              className="mt-8"
+              className="mt-8 space-y-4"
             >
-              <button className="w-full md:w-auto bg-gradient-to-r from-blue-500/20 to-yellow-500/20 text-black py-3 px-8 rounded-lg hover:from-blue-500/30 hover:to-yellow-500/30 transition-all">
-                Хөрөнгө оруулах
+              <button 
+                onClick={handleRequest}
+                disabled={isRequesting}
+                className="w-full md:w-auto bg-gradient-to-r from-blue-500/20 to-yellow-500/20 text-black py-3 px-8 rounded-lg hover:from-blue-500/30 hover:to-yellow-500/30 transition-all disabled:opacity-50"
+              >
+                {isRequesting ? "Илгээж байна..." : "Хөрөнгө оруулах"}
               </button>
+              
+              {requestStatus === "success" && (
+                <p className="text-green-600 text-center">Хүсэлт амжилттай илгээгдлээ</p>
+              )}
+              {requestStatus === "error" && (
+                <p className="text-red-600 text-center">Алдаа гарлаа. Дахин оролдоно уу</p>
+              )}
             </motion.div>
           </div>
         </motion.div>
