@@ -2,12 +2,12 @@ import nodemailer from 'nodemailer';
 import { BondRequest } from '@/app/models/BondRequest';
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.office365.com",
-  port: 587,
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
   secure: false,
   auth: {
-    user: "info@apex.mn",
-    pass: "brlkrlysbdsswtgy",
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
   },
 });
 
