@@ -671,7 +671,6 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
           </TabsList>
           <TabsContent value="basic" className="mt-6">
             <div className="space-y-6">
-              {/* Name Section */}
               <div className="p-4 bg-white rounded-lg border border-gray-200">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Нэр
@@ -1140,15 +1139,17 @@ function NotificationSettings() {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const response = await fetch('/api/bond/requests');
+        const response = await fetch("/api/bond/requests");
         if (response.ok) {
           const data = await response.json();
           // Filter requests for the current user
-          const userRequests = data.filter((request: BondRequest) => request.userEmail === user?.email);
+          const userRequests = data.filter(
+            (request: BondRequest) => request.userEmail === user?.email
+          );
           setRequests(userRequests);
         }
       } catch (error) {
-        console.error('Error fetching requests:', error);
+        console.error("Error fetching requests:", error);
       } finally {
         setIsLoading(false);
       }
@@ -1161,11 +1162,11 @@ function NotificationSettings() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'accepted':
+      case "accepted":
         return <Check className="w-5 h-5 text-green-500" />;
-      case 'declined':
+      case "declined":
         return <X className="w-5 h-5 text-red-500" />;
-      case 'pending':
+      case "pending":
         return <Clock className="w-5 h-5 text-yellow-500" />;
       default:
         return <AlertCircle className="w-5 h-5 text-gray-500" />;
@@ -1174,14 +1175,14 @@ function NotificationSettings() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'accepted':
-        return 'bg-green-100 text-green-800';
-      case 'declined':
-        return 'bg-red-100 text-red-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+      case "accepted":
+        return "bg-green-100 text-green-800";
+      case "declined":
+        return "bg-red-100 text-red-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -1201,7 +1202,9 @@ function NotificationSettings() {
       <div className="space-y-4">
         {requests.length === 0 ? (
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <p className="text-gray-600">Хөрөнгө оруулалтын хүсэлт оруулаагүй байна</p>
+            <p className="text-gray-600">
+              Хөрөнгө оруулалтын хүсэлт оруулаагүй байна
+            </p>
           </div>
         ) : (
           requests.map((request) => (
@@ -1213,12 +1216,18 @@ function NotificationSettings() {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-medium text-gray-900">{request.bondTitle}</h3>
+                  <h3 className="font-medium text-gray-900">
+                    {request.bondTitle}
+                  </h3>
                   <p className="text-sm text-gray-500">
-                    {format(new Date(request.timestamp), 'PPP p')}
+                    {format(new Date(request.timestamp), "PPP p")}
                   </p>
                 </div>
-                <div className={`flex items-center gap-2 px-3 py-1 rounded-md ${getStatusColor(request.status)}`}>
+                <div
+                  className={`flex items-center gap-2 px-3 py-1 rounded-md ${getStatusColor(
+                    request.status
+                  )}`}
+                >
                   {getStatusIcon(request.status)}
                   <span className="capitalize">{request.status}</span>
                 </div>
