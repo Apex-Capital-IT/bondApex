@@ -89,9 +89,22 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-col md:flex-row relative">
+      {/* Background Image - Mobile */}
+      <div className="absolute inset-0 md:hidden">
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <Image
+          src="/BOND-1x1.png"
+          alt="Bond Image"
+          fill
+          className="object-cover"
+          priority
+          sizes="100vw"
+        />
+      </div>
+
       {/* Left side - Form */}
-      <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-8 bg-white order-2 md:order-1">
+      <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-4 md:p-8 bg-white/95 md:bg-white relative z-10 order-2 md:order-1 min-h-screen md:min-h-0">
         <div className="w-full max-w-md">
           <Link
             href="/login"
@@ -214,15 +227,15 @@ export default function ForgotPasswordPage() {
         </div>
       </div>
 
-      {/* Right side - Image */}
-      <div className="w-full md:w-1/2 relative h-[300px] md:h-auto order-1 md:order-2">
+      {/* Right side - Image - Desktop Only */}
+      <div className="w-full md:w-1/2 relative h-[300px] md:h-auto order-1 md:order-2 hidden md:block">
         <Image
           src="/BOND-1x1.png"
           alt="Bond Image"
           fill
           className="object-cover"
           priority
-          sizes="(max-width: 768px) 100vw, 50vw"
+          sizes="50vw"
         />
       </div>
     </div>
