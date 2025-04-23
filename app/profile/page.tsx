@@ -53,20 +53,22 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Navigation />
 
-      <div className=" h-screen mx-auto px-4 sm:px-6 lg:px-28 py-8 pt-24">
-        <div className="bg-white rounded-2xl h-full shadow-xl overflow-hidden">
+      <div className="h-screen mx-auto px-2 sm:px-4 md:px-6 lg:px-28 py-4 sm:py-6 md:py-8 pt-20 md:pt-24 sm:pt-24">
+        <div className="bg-white rounded-xl sm:rounded-2xl h-full shadow-xl overflow-hidden">
           <div className="flex flex-col md:flex-row h-full">
             {/* Sidebar */}
             <div
               className={cn(
-                "flex flex-col border-r bg-white transition-all duration-300",
-                isSidebarOpen ? "w-[250px]" : "w-[60px]"
+                "flex flex-col bg-white transition-all duration-300",
+                isSidebarOpen
+                  ? "w-full md:w-[250px] md:border-r"
+                  : "w-full md:w-[60px] md:border-r"
               )}
             >
               <div className="flex h-14 items-center border-b px-4">
                 <div className="flex items-center gap-2 font-semibold justify-center">
                   {isSidebarOpen ? (
-                    <span className="text-2xl font-bold text-gray-800">
+                    <span className="text-xl sm:text-2xl font-bold text-gray-800">
                       Профайл
                     </span>
                   ) : (
@@ -84,60 +86,68 @@ export default function ProfilePage() {
               </div>
 
               <div className="flex-1 overflow-y-auto">
-                <div className="p-6">
+                <div className="p-2 sm:p-6">
                   {isSidebarOpen && (
                     <p className="text-sm text-gray-500">
                       Хэрэглэгчийн тохиргоо
                     </p>
                   )}
                 </div>
-                <nav className="space-y-1 px-2 py-2">
-                  <button
-                    onClick={() => setActiveTab("profile")}
-                    className={cn(
-                      "w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200",
-                      activeTab === "profile"
-                        ? "bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl text-gray-600 shadow-sm"
-                        : "text-gray-600 hover:bg-gray-50",
-                      !isSidebarOpen && "justify-center px-2"
-                    )}
-                  >
-                    <User className="h-5 w-5 flex-shrink-0" />
-                    {isSidebarOpen && <span className="ml-3">Профайл</span>}
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("notifications")}
-                    className={cn(
-                      "w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200",
-                      activeTab === "notifications"
-                        ? "bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl text-gray-600 shadow-sm"
-                        : "text-gray-600 hover:bg-gray-50",
-                      !isSidebarOpen && "justify-center px-2"
-                    )}
-                  >
-                    <Bell className="h-5 w-5 flex-shrink-0" />
-                    {isSidebarOpen && <span className="ml-3">Мэдэгдэл</span>}
-                  </button>
-                  <button
-                    onClick={() => setShowLogoutModal(true)}
-                    className={cn(
-                      "w-full flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-all duration-200",
-                      !isSidebarOpen && "justify-center px-2"
-                    )}
-                  >
-                    <LogOut className="h-5 w-5 flex-shrink-0" />
-                    {isSidebarOpen && <span className="ml-3">Гарах</span>}
-                  </button>
+                <nav className={cn(
+                  "space-y-1 px-2 py-2",
+                  !isSidebarOpen && "flex flex-row justify-center gap-2"
+                )}>
+                  <div className={cn(
+                    "flex flex-row md:flex-col gap-2 md:gap-1",
+                    !isSidebarOpen && "flex-row"
+                  )}>
+                    <button
+                      onClick={() => setActiveTab("profile")}
+                      className={cn(
+                        "flex items-center px-2 py-2 text-sm font-medium rounded-lg transition-all duration-200",
+                        activeTab === "profile"
+                          ? "bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl text-gray-600 shadow-sm"
+                          : "text-gray-600 hover:bg-gray-50",
+                        !isSidebarOpen && "justify-center px-2"
+                      )}
+                    >
+                      <User className="h-5 w-5 flex-shrink-0" />
+                      {isSidebarOpen && <span className="ml-3">Профайл</span>}
+                    </button>
+                    <button
+                      onClick={() => setActiveTab("notifications")}
+                      className={cn(
+                        "flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200",
+                        activeTab === "notifications"
+                          ? "bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl text-gray-600 shadow-sm"
+                          : "text-gray-600 hover:bg-gray-50",
+                        !isSidebarOpen && "justify-center px-2"
+                      )}
+                    >
+                      <Bell className="h-5 w-5 flex-shrink-0" />
+                      {isSidebarOpen && <span className="ml-3">Мэдэгдэл</span>}
+                    </button>
+                    <button
+                      onClick={() => setShowLogoutModal(true)}
+                      className={cn(
+                        "flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-lg transition-all duration-200",
+                        !isSidebarOpen && "justify-center px-2"
+                      )}
+                    >
+                      <LogOut className="h-5 w-5 flex-shrink-0" />
+                      {isSidebarOpen && <span className="ml-3">Гарах</span>}
+                    </button>
+                  </div>
                 </nav>
               </div>
             </div>
-            <div className="flex-1 p-6 md:p-8 overflow-y-auto">
+            <div className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto">
               <div className="h-full">
                 {activeTab === "profile" ? (
                   <div className="relative">
                     <button
                       onClick={() => setIsEditing(!isEditing)}
-                      className="absolute top-0 right-0 px-4 py-2 bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl text-gray-600 rounded-lg  transition-colors duration-200"
+                      className="absolute top-0 right-0 px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl text-gray-600 rounded-lg transition-colors duration-200"
                     >
                       {isEditing ? (
                         <CircleMinus className="w-4 h-4" />
@@ -604,13 +614,13 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
   return (
     <>
       <div className="mx-auto">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">
+        <h2 className="text-lg sm:text-2xl font-bold mb-4 text-gray-800">
           Профайл мэдээлэл
         </h2>
 
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
-            <div className="relative w-24 h-24 group">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 group">
               {imagePreview ? (
                 <>
                   <Image
@@ -643,8 +653,8 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
                   )}
                 </>
               ) : (
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center shadow-lg">
-                  <User className="w-16 h-16 text-gray-400" />
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center shadow-lg">
+                  <User className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400" />
                 </div>
               )}
               {isEditing && (
@@ -669,9 +679,9 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
             <TabsTrigger value="basic">Үндсэн мэдээлэл</TabsTrigger>
             {isEditing && <TabsTrigger value="password">Нууц үг</TabsTrigger>}
           </TabsList>
-          <TabsContent value="basic" className="mt-6">
-            <div className="space-y-6">
-              <div className="p-4 bg-white rounded-lg border border-gray-200">
+          <TabsContent value="basic" className="mt-4 sm:mt-6">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="p-3 sm:p-4 bg-white rounded-lg border border-gray-200">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Нэр
                 </label>
@@ -690,7 +700,7 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
               </div>
 
               {/* Email Section */}
-              <div className="p-4 bg-white rounded-lg border border-gray-200">
+              <div className="p-3 sm:p-4 bg-white rounded-lg border border-gray-200">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   И-мэйл
                 </label>
@@ -714,7 +724,7 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
                     <button
                       type="button"
                       onClick={() => setShowEmailModal(true)}
-                      className="px-4 py-2 bg-gradient-to-r rounded-r-xl from-blue-500/20 to-yellow-500/20 backdrop-blur-xl text-gray-600 transition-colors duration-200"
+                      className="px-3 sm:px-4 py-2 bg-gradient-to-r rounded-r-xl from-blue-500/20 to-yellow-500/20 backdrop-blur-xl text-gray-600 transition-colors duration-200"
                     >
                       Солих
                     </button>
@@ -728,7 +738,7 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
                     type="button"
                     onClick={handleSubmit}
                     disabled={loading}
-                    className="px-4 py-2 bg-gradient-to-r rounded-xl from-blue-500/20 to-yellow-500/20 backdrop-blur-xl text-gray-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 sm:px-4 py-2 bg-gradient-to-r rounded-xl from-blue-500/20 to-yellow-500/20 backdrop-blur-xl text-gray-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? "Түр хүлээнэ үү..." : "Хадгалах"}
                   </button>
@@ -737,11 +747,11 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
             </div>
           </TabsContent>
           {isEditing && (
-            <TabsContent value="password" className="mt-6">
-              <div className="space-y-6">
-                <div className="p-4 bg-white rounded-lg border border-gray-200">
+            <TabsContent value="password" className="mt-4 sm:mt-6">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="p-3 sm:p-4 bg-white rounded-lg border border-gray-200">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-medium text-gray-800">
+                    <h3 className="text-base sm:text-lg font-medium text-gray-800">
                       Нууц үг солих
                     </h3>
                     <button
@@ -819,7 +829,7 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
                         type="button"
                         onClick={handlePasswordChange}
                         disabled={loading}
-                        className="px-4 py-2 bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl rounded-lg text-gray-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-3 sm:px-4 py-2 bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl rounded-lg text-gray-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {loading ? "Түр хүлээнэ үү..." : "Нууц үг солих"}
                       </button>
@@ -1189,19 +1199,19 @@ function NotificationSettings() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[200px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
     <div className="h-full">
-      <h2 className="text-3xl font-bold mb-6 text-gray-800">
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4 sm:mb-6 text-gray-800">
         Миний хөрөнгө оруулалтын хүсэлтүүд
       </h2>
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {requests.length === 0 ? (
-          <div className="bg-white rounded-lg p-6 shadow-sm">
+          <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm">
             <p className="text-gray-600">
               Хөрөнгө оруулалтын хүсэлт оруулаагүй байна
             </p>
@@ -1210,11 +1220,11 @@ function NotificationSettings() {
           requests.map((request) => (
             <motion.div
               key={request.id}
-              className="bg-white rounded-lg p-6 shadow-sm"
+              className="bg-white rounded-lg p-4 sm:p-6 shadow-sm"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              <div className="flex justify-between items-start">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4">
                 <div>
                   <h3 className="font-medium text-gray-900">
                     {request.bondTitle}
@@ -1233,7 +1243,7 @@ function NotificationSettings() {
                 </div>
               </div>
               {request.declineReason && (
-                <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                <div className="mt-3 sm:mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
                   <p className="font-medium">Татгалзсан шалтгаан:</p>
                   <p>{request.declineReason}</p>
                 </div>

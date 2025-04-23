@@ -101,6 +101,107 @@ export default function Navigation() {
         </motion.div>
       </motion.button>
 
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          className="absolute top-full left-0 w-full bg-white shadow-lg md:hidden"
+        >
+          <div className="flex flex-col p-4 space-y-4">
+            <Link
+              href="https://www.facebook.com/apexcapital.mn"
+              className="px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Contact us
+            </Link>
+            <Link
+              href="coming-soon"
+              className="px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              For business
+            </Link>
+            <Link
+              href="https://www.facebook.com/apexcapital.mn"
+              className="px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              About us
+            </Link>
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                  className="w-full px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg flex items-center gap-2"
+                >
+                  {user.profileImage ? (
+                    <Image
+                      src={user.profileImage}
+                      alt="Profile"
+                      width={24}
+                      height={24}
+                      className="rounded-full w-6 h-6 object-cover"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+                      <User className="w-4 h-4 text-gray-500" />
+                    </div>
+                  )}
+                  <span className="text-sm">Профайл</span>
+                </button>
+                {profileDropdownOpen && (
+                  <div className="mt-2 w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                    <div className="py-1">
+                      <Link
+                        href="/profile"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        onClick={() => {
+                          setProfileDropdownOpen(false);
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        <User className="w-4 h-4" />
+                        Профайл
+                      </Link>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setMobileMenuOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Гарах
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/signup"
+                  className="px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Бүртгүүлэх
+                </Link>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Нэвтрэх
+                </Link>
+              </>
+            )}
+          </div>
+        </motion.div>
+      )}
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
