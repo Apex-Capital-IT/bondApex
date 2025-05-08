@@ -857,7 +857,6 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
         loading={loading}
         confirmText="Тийм"
         cancelText="Үгүй"
-        className="z-[1000]"
       />
 
       <ConfirmationModal
@@ -1145,6 +1144,7 @@ function NotificationSettings() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<BondRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedRequestId, setExpandedRequestId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -1169,6 +1169,11 @@ function NotificationSettings() {
       fetchRequests();
     }
   }, [user?.email]);
+
+  // Toggle expanded view for request details
+  const toggleRequestDetails = (requestId: string) => {
+    setExpandedRequestId(expandedRequestId === requestId ? null : requestId);
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -1220,9 +1225,10 @@ function NotificationSettings() {
           requests.map((request) => (
             <motion.div
               key={request.id}
-              className="bg-white rounded-lg p-4 sm:p-6 shadow-sm"
+              className="bg-white rounded-lg p-4 sm:p-6 shadow-sm cursor-pointer"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              onClick={() => toggleRequestDetails(request.id)}
             >
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4">
                 <div>
@@ -1233,15 +1239,101 @@ function NotificationSettings() {
                     {format(new Date(request.timestamp), "PPP p")}
                   </p>
                 </div>
-                <div
-                  className={`flex items-center gap-2 px-3 py-1 rounded-md ${getStatusColor(
-                    request.status
-                  )}`}
-                >
-                  {getStatusIcon(request.status)}
-                  <span className="capitalize">{request.status}</span>
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`flex items-center gap-2 px-3 py-1 rounded-md ${getStatusColor(
+                      request.status
+                    )}`}
+                  >
+                    {getStatusIcon(request.status)}
+                    <span className="capitalize">{request.status}</span>
+                  </div>
+                  <div className="text-gray-400">
+                    {expandedRequestId === request.id ? "▲" : "▼"}
+                  </div>
                 </div>
               </div>
+
+              {/* Expanded detail view */}
+              {expandedRequestId === request.id && (
+                <motion.div 
+                  className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Left column - Form details */}
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-2">Хүсэлтийн дэлгэрэнгүй</h4>
+                      <div className="space-y-2">
+                        {request.name && (
+                          <>
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">Нэр:</span>
+                              <span className="font-medium">{request.name}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">Регистр:</span>
+                              <span className="font-medium">{request.registration || "N/A"}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">И-мэйл:</span>
+                              <span className="font-medium">{request.userEmail}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">Утас:</span>
+                              <span className="font-medium">{request.phone || "N/A"}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">Үнийн дүн:</span>
+                              <span className="font-medium">{request.price || "N/A"}</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Right column - Bond details */}
+                    <div>
+                      <h4 className="font-medium text-gray-700 mb-2">Бондын мэдээлэл</h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">ID:</span>
+                          <span className="font-medium">{request.bondId}</span>
+                        </div>
+                        
+                        {request.nominalPrice && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Нэрлэсэн үнэ:</span>
+                            <span className="font-medium">{request.nominalPrice}</span>
+                          </div>
+                        )}
+                        
+                        {request.unitPrice && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Нэгж үнэ:</span>
+                            <span className="font-medium">{request.unitPrice}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Features List */}
+                      {(request.features || request.bondFeatures) && (
+                        <div className="mt-3">
+                          <h5 className="text-gray-500 mb-1">Онцлогууд:</h5>
+                          <ul className="list-disc list-inside space-y-1">
+                            {(request.features || request.bondFeatures || []).map((feature, index) => (
+                              <li key={index} className="text-sm text-gray-700">{feature}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {request.declineReason && (
                 <div className="mt-3 sm:mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
                   <p className="font-medium">Татгалзсан шалтгаан:</p>

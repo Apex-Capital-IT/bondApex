@@ -7,12 +7,19 @@ export interface BondRequest {
   bondId: string;
   bondTitle: string;
   features?: string[];
+  bondFeatures?: string[];
   nominalPrice?: string;
   unitPrice?: string;
   timestamp: string;
   status: 'pending' | 'accepted' | 'declined';
   declineReason?: string;
   userEmail: string;
+  
+  name?: string;
+  registration?: string;
+  phone?: string;
+  price?: string;
+  bondImage?: string;
 }
 
 export async function createBondRequest(request: BondRequest) {

@@ -45,10 +45,14 @@ export default function DetailPage() {
             className="mb-12"
           >
             <h1 className="text-5xl md:text-6xl font-bold mb-6 font-[var(--font-anton)] text-transparent h-fit bg-clip-text bg-gradient-to-r from-blue-500/40 to-yellow-500/40">
-              Хугацаа бага, боломж их.
+              Богино хугацаат бонд
             </h1>
-            <p className="text-xl text-black/80">
-              Apex Capital богино хугацаат бонд
+            <p className="text-s text-gray-700">
+              Санхүүгийн хэрэглээндээ тохируулан богино хугацаанд уян хатан
+              бондод хөрөнгө оруулах боломж. Албан байгууллагууд болон хувь
+              хүмүүс харилцах дансандаа хүүгүй байршиж буй мөнгөн хөрөнгөө
+              хугацаагүй бондод байршуулснаар мөнгөн хөрөнгөө үр өгөөжтэйгээр
+              оновчтой удирдах шийдэл юм.
             </p>
           </motion.div>
 
@@ -61,31 +65,46 @@ export default function DetailPage() {
             <div className="bg-white/10 backdrop-blur-xl p-8 rounded-2xl border-2 border-gradient-to-r from-blue-500/40 to-yellow-500/40">
               <div className="relative">
                 <h2 className="text-2xl font-bold mb-4 text-black/90">
-                  Богино хугацаат бонд гэж юу вэ?
+                  Нөхцөл:
                 </h2>
-                <p className="text-black/80">
-                  Богино хугацаат бонд нь хөрөнгө оруулагчдад богино хугацаанд
-                  өндөр өгөөж олох боломжийг олгодог санхүүгийн хэрэгсэл юм.
-                  <li>Хүү – 15.0%-19.0%</li>
-                  <li>Хугацаа – 1 сараас 11 сар хүртэлх </li>
-                </p>
+                <ul className="text-black/80 space-y-1">
+                  <li>
+                    Хүү – 15.0%-19.0% <br />
+                    <span className="text-sm text-black/60">
+                      /Ямар хугацаанд байршуулснаас хамаарч хүүгийн өгөөж
+                      шатласан байдлаар бодогдоно/
+                    </span>
+                  </li>
+                  <li className="mt-4 font-semibold">
+                    Хугацаа / Жилийн хүү (татварын өмнөх):
+                  </li>
+                  <li>1 сар хүртэлх — 14.0%</li>
+                  <li>3 сар хүртэлх — 15.0%</li>
+                  <li>5 сар хүртэлх — 16.0%</li>
+                  <li>7 сар хүртэлх — 17.0%</li>
+                  <li>9 сар хүртэлх — 18.0%</li>
+                  <li className="mt-4">Хугацаа – 7 хоногоос 12 сар хүртэлх</li>
+                  <li>Доод дүн - 50 сая төгрөг</li>
+                </ul>
               </div>
             </div>
 
             <div className="bg-white/10 backdrop-blur-xl p-8 rounded-2xl border-2 border-gradient-to-r from-blue-500/40 to-yellow-500/40">
               <div className="relative">
                 <h2 className="text-2xl font-bold mb-4 text-black/90">
-                  Давуу талууд
+                  Давуу тал:
                 </h2>
                 <ul className="space-y-4 text-black/80">
                   <li>
-                    • Хүссэн үедээ буцаан худалдах боломжтой хөрвөх чадвар өндөр{" "}
+                    • Хүссэн үедээ буцаан худалдах боломжтой ба хөрвөх чадвар
+                    өндөр
                   </li>
                   <li>
-                    • Богино хугацаанд ашиглахаар төлөвлөсөн хөрөнгөө үр
-                    өгөөжтэй байршуулах{" "}
+                    • Богино хугацаанд ашиглахаар төлөвлөсөн хөрөнгөөс өгөөж
+                    хүртэх
                   </li>
-                  <li>• Мөнгөн урсгалын оновчтой удирдлага </li>
+                  <li>• Мөнгөн урсгалын оновчтой удирдлага</li>
+                  <li>• Эзэмшсэн 1 хоногт ч хүү бодох нөхцөлтэй</li>
                 </ul>
               </div>
             </div>

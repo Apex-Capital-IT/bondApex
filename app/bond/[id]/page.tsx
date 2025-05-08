@@ -1,5 +1,4 @@
 "use client";
-
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,6 +7,8 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const bonds = [
   {
@@ -55,49 +56,86 @@ export default function BondPage() {
   const params = useParams();
   const bond = bonds.find((b) => b.id === params.id);
   const [isRequesting, setIsRequesting] = useState(false);
-  const [requestStatus, setRequestStatus] = useState<"idle" | "success" | "error">("idle");
-  const [requestId, setRequestId] = useState<string | null>(null);
   const { user } = useAuth();
   const router = useRouter();
 
-  const handleRequest = async () => {
-    if (!user) {
-      router.push("/login");
-      return;
-    }
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    registration: "",
+    email: "",
+    phone: "",
+    price: "",
+  });
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+
+    if (id === "price") {
+      const cleanedValue = value.replace(/[^0-9]/g, "");
+      const formattedValue = cleanedValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      setFormData((prevState) => ({ ...prevState, [id]: formattedValue }));
+    } else {
+      setFormData((prevState) => ({ ...prevState, [id]: value }));
+    }
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsRequesting(true);
-    setRequestStatus("idle");
-    
+
+    const nominalPrice = bond.features.find((feature) =>
+      feature.includes("Нэрлэсэн үнэ:")
+    );
+    const unitPrice = bond.features.find((feature) =>
+      feature.includes("Нэгж үнэ:")
+    );
+
     try {
-      const response = await fetch('/api/bond/request', {
-        method: 'POST',
+      const response = await fetch("/api/submit-form", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          bondId: bond?.id,
-          bondTitle: bond?.title,
-          timestamp: new Date().toISOString(),
-          userEmail: user.email,
+          ...formData,
+          bondId: bond.id,
+          bondTitle: bond.title,
+          bondFeatures: bond.features,
+          bondImage: bond.image,
+          nominalPrice,
+          unitPrice,
         }),
       });
 
       const data = await response.json();
-      console.log("Request response:", data);
-
       if (response.ok) {
-        setRequestStatus("success");
-        setRequestId(data.id);
+        toast.success("Хүсэлт амжилттай илгээгдлээ");
+        setFormData({
+          name: "",
+          registration: "",
+          email: "",
+          phone: "",
+          price: "",
+        });
+        setIsModalOpen(false);
       } else {
-        setRequestStatus("error");
+        toast.error("Алдаа гарлаа. Дахин оролдоно уу");
       }
     } catch (error) {
-      console.error("Error submitting request:", error);
-      setRequestStatus("error");
+      console.error("Error submitting form:", error);
+      toast.error("Алдаа гарлаа. Дахин оролдоно уу");
     } finally {
       setIsRequesting(false);
     }
+  };
+
+  const handleRequest = () => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    setIsModalOpen(true);
   };
 
   if (!bond) {
@@ -171,24 +209,79 @@ export default function BondPage() {
               transition={{ duration: 0.5, delay: 1 }}
               className="mt-8 space-y-4"
             >
-              <button 
+              <button
                 onClick={handleRequest}
                 disabled={isRequesting}
                 className="w-full md:w-auto bg-gradient-to-r from-blue-500/20 to-yellow-500/20 text-black py-3 px-8 rounded-lg hover:from-blue-500/30 hover:to-yellow-500/30 transition-all disabled:opacity-50"
               >
-                {isRequesting ? "Илгээж байна..." : "Хөрөнгө оруулах"}
+                {isRequesting ? "Илгээж байна..." : "Форм бөглөх"}
               </button>
-              
-              {requestStatus === "success" && (
-                <p className="text-green-600 text-center">Хүсэлт амжилттай илгээгдлээ</p>
-              )}
-              {requestStatus === "error" && (
-                <p className="text-red-600 text-center">Алдаа гарлаа. Дахин оролдоно уу</p>
-              )}
             </motion.div>
           </div>
         </motion.div>
       </div>
+
+      {/* Modal for Form */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg relative"
+          >
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-2 right-2 text-2xl text-gray-600 hover:text-gray-900"
+            >
+              &times;
+            </button>
+
+            <h2 className="text-2xl font-bold mb-6 text-center">Мэдээлэл</h2>
+
+            <form onSubmit={handleFormSubmit}>
+              {[
+                { label: "Нэр", id: "name", type: "text" },
+                { label: "Регистр", id: "registration", type: "text" },
+                { label: "Мэйл", id: "email", type: "email" },
+                { label: "Утасны дугаар", id: "phone", type: "text" },
+                { label: "Үнийн дүн", id: "price", type: "text" },
+              ].map((field) => (
+                <div key={field.id} className="mb-4">
+                  <label
+                    htmlFor={field.id}
+                    className="block text-lg font-semibold"
+                  >
+                    {field.label}
+                  </label>
+                  <input
+                    type={field.type}
+                    id={field.id}
+                    value={formData[field.id]}
+                    onChange={handleInputChange}
+                    className="w-full p-3 border border-gray-300 rounded-md"
+                    required
+                  />
+                </div>
+              ))}
+
+              <motion.button
+                type="submit"
+                disabled={isRequesting}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="w-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 text-black py-3 px-6 rounded-md transition-all disabled:opacity-50"
+              >
+                {isRequesting ? "Илгээж байна..." : "Илгээх"}
+              </motion.button>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Toast Notifications */}
+      <ToastContainer />
     </div>
   );
 }
