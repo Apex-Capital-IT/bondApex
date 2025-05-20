@@ -43,8 +43,8 @@ export default function Home() {
         <Navigation />
 
         <section className="relative h-screen w-full flex items-center justify-start">
-          <div className="w-full h-screen bg-gradient-to-br from-[white] via-[#004a85] to-[#1782e0] pt-16 pb-12 flex items-center relative">
-            <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-white via-[#1782e0]/90 to-transparent"></div>
+          <div className="w-full h-screen bg-gradient-to-bl from-[#6ab7f7] via-[#1c88e8]/90 to-[#1c88e8] pt-16 pb-12 flex items-center relative">
+            <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-white via-[#1c88e8] to-transparent"></div>
             <div className="container mx-auto px-4 relative z-10">
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight max-w-4xl mb-6">
