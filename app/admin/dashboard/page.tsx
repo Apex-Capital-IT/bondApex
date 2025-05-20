@@ -6,6 +6,8 @@ import { BondRequest } from "@/app/models/BondRequest";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { Check, X, Clock, AlertCircle } from "lucide-react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function AdminDashboard() {
   const [requests, setRequests] = useState<BondRequest[]>([]);
@@ -19,6 +21,7 @@ export default function AdminDashboard() {
   );
   const [isDragging, setIsDragging] = useState(false);
   const router = useRouter();
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     // Check if there's a saved code in localStorage
@@ -64,6 +67,7 @@ export default function AdminDashboard() {
     newStatus: "pending" | "accepted" | "declined"
   ) => {
     try {
+      setIsUpdating(true);
       const response = await fetch(`/api/bond/request/${request.id}`, {
         method: "PATCH",
         headers: {
@@ -90,9 +94,12 @@ export default function AdminDashboard() {
         );
         setSelectedRequest(null);
         setDeclineReason("");
+        toast.success("Хүсэлт амжилттай шинэчлэгдлээ");
       }
     } catch (error) {
       console.error("Error updating request status:", error);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -114,14 +121,20 @@ export default function AdminDashboard() {
     newStatus: "pending" | "accepted" | "declined"
   ) => {
     e.preventDefault();
+    if (isUpdating) return; // prevent multiple drops
+
     const requestId = e.dataTransfer.getData("requestId");
     const request = requests.find((r) => r.id === requestId);
 
     if (request && request.status !== newStatus) {
+      setIsUpdating(true);
+
       if (newStatus === "declined") {
         setSelectedRequest(request);
+        setIsUpdating(false); // allow further interaction immediately
       } else {
-        handleStatusChange(request, newStatus);
+        await handleStatusChange(request, newStatus);
+        setIsUpdating(false); // unlock drops
       }
     }
   };
@@ -181,6 +194,11 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Bond Requests</h1>
+        {isUpdating && (
+          <div className="fixed inset-0 bg-white/50 z-50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+          </div>
+        )}
 
         <div className="grid grid-cols-3 gap-6">
           {["pending", "accepted", "declined"].map((status) => (
@@ -346,6 +364,7 @@ export default function AdminDashboard() {
           ))}
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }

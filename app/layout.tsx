@@ -27,6 +27,27 @@ const cormorantGaramond = Cormorant_Garamond({
 export const metadata: Metadata = {
   title: "Apex Capital",
   description: "Apex Capital - Your Investment Partner",
+  icons: {
+    icon: "/favicon.ico",
+  },
+  openGraph: {
+    title: "Apex Capital",
+    description: "Apex Capital - Your Investment Partner",
+    images: [
+      {
+        url: "/BOND-1x1.png",
+        width: 1200,
+        height: 630,
+        alt: "Apex Capital - Your Investment Partner",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Apex Capital",
+    description: "Apex Capital - Your Investment Partner",
+    images: ["/BOND-1x1.png"],
+  },
 };
 
 export default function RootLayout({
@@ -45,4 +66,3 @@ export default function RootLayout({
   );
 }
 import "./globals.css";
-

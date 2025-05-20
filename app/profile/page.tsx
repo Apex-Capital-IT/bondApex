@@ -16,18 +16,32 @@ import {
   X,
   Clock,
   AlertCircle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import Navigation from "../components/Navigation";
+import Navigation from "../components/ProfileNavigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loading from "@/components/ui/loading";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { BondRequest } from "@/app/models/BondRequest";
+
+// Add this type definition at the top of the file, after imports
+type ConfirmationModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  message: string | React.ReactNode;
+  loading: boolean;
+  confirmText: string;
+  cancelText: string;
+};
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -56,7 +70,6 @@ export default function ProfilePage() {
       <div className="h-screen mx-auto px-2 sm:px-4 md:px-6 lg:px-28 py-4 sm:py-6 md:py-8 pt-20 md:pt-24 sm:pt-24">
         <div className="bg-white rounded-xl sm:rounded-2xl h-full shadow-xl overflow-hidden">
           <div className="flex flex-col md:flex-row h-full">
-            {/* Sidebar */}
             <div
               className={cn(
                 "flex flex-col bg-white transition-all duration-300",
@@ -93,14 +106,18 @@ export default function ProfilePage() {
                     </p>
                   )}
                 </div>
-                <nav className={cn(
-                  "space-y-1 px-2 py-2",
-                  !isSidebarOpen && "flex flex-row justify-center gap-2"
-                )}>
-                  <div className={cn(
-                    "flex flex-row md:flex-col gap-2 md:gap-1",
-                    !isSidebarOpen && "flex-row"
-                  )}>
+                <nav
+                  className={cn(
+                    "space-y-1 px-2 py-2",
+                    !isSidebarOpen && "flex flex-row justify-center gap-2"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex flex-row md:flex-col gap-2 md:gap-1",
+                      !isSidebarOpen && "flex-row"
+                    )}
+                  >
                     <button
                       onClick={() => setActiveTab("profile")}
                       className={cn(
@@ -203,6 +220,10 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
   const [showPasswordError, setShowPasswordError] = useState(false);
   const [passwordErrorTimeout, setPasswordErrorTimeout] =
     useState<NodeJS.Timeout | null>(null);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPasswordSuccess, setShowPasswordSuccess] = useState(false);
 
   // Add useEffect to handle password error timeout
   useEffect(() => {
@@ -409,18 +430,28 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
       }
 
       updateUser(data);
-      setSuccess("Профайл амжилттай шинэчлэгдлээ");
-      setFormData((prev) => ({
-        ...prev,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      }));
+      if (formData.currentPassword) {
+        setSuccess("Нууц үг амжилттай солигдлоо");
+        setShowPasswordSuccess(true);
+        // Clear password fields
+        setFormData((prev) => ({
+          ...prev,
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        }));
+        // Hide modal and success message after 2 seconds
+        setTimeout(() => {
+          setShowPasswordSuccess(false);
+          setShowPasswordModal(false);
+        }, 2000);
+      } else {
+        setSuccess("Профайл амжилттай шинэчлэгдлээ");
+      }
     } catch (err: any) {
       setError(err.message || "Алдаа гарлаа");
     } finally {
       setLoading(false);
-      setShowUpdateModal(false);
     }
   };
 
@@ -759,7 +790,7 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
                       onClick={() => setShowResetPasswordModal(true)}
                       className="text-sm text-blue-600 hover:text-blue-800 transition-colors duration-200"
                     >
-                      Нууц үг сэргээх
+                      Нууц үг сэргээх ?
                     </button>
                   </div>
 
@@ -768,54 +799,93 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Одоогийн нууц үг
                       </label>
-                      <input
-                        type="password"
-                        value={formData.currentPassword}
-                        onChange={(e) => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            currentPassword: e.target.value,
-                          }));
-                          handlePasswordInput();
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg transition-colors duration-200"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showCurrentPassword ? "text" : "password"}
+                          value={formData.currentPassword}
+                          onChange={(e) => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              currentPassword: e.target.value,
+                            }));
+                            handlePasswordInput();
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg transition-colors duration-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showCurrentPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Шинэ нууц үг
                       </label>
-                      <input
-                        type="password"
-                        value={formData.newPassword}
-                        onChange={(e) => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            newPassword: e.target.value,
-                          }));
-                          handlePasswordInput();
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg transition-colors duration-200"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showNewPassword ? "text" : "password"}
+                          value={formData.newPassword}
+                          onChange={(e) => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              newPassword: e.target.value,
+                            }));
+                            handlePasswordInput();
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg transition-colors duration-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showNewPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Шинэ нууц үг давтах
                       </label>
-                      <input
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={(e) => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            confirmPassword: e.target.value,
-                          }));
-                          handlePasswordInput();
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg transition-colors duration-200"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={formData.confirmPassword}
+                          onChange={(e) => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              confirmPassword: e.target.value,
+                            }));
+                            handlePasswordInput();
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg transition-colors duration-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-5 w-5" />
+                          ) : (
+                            <Eye className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
                     </div>
 
                     {showPasswordError && (
@@ -872,10 +942,23 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
 
       <ConfirmationModal
         isOpen={showPasswordModal}
-        onClose={() => setShowPasswordModal(false)}
+        onClose={() => {
+          setShowPasswordModal(false);
+          setShowPasswordSuccess(false);
+        }}
         onConfirm={proceedWithUpdate}
         title="Нууц үг солих"
-        message="Та нууц үгээ солихдоо итгэлтэй байна уу?"
+        message={
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">Та нууц үгээ солихдоо итгэлтэй байна уу?</p>
+            {showPasswordSuccess && (
+              <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg flex items-center gap-2">
+                <Check className="h-5 w-5" />
+                <span>Нууц үг амжилттай солигдлоо</span>
+              </div>
+            )}
+          </div>
+        }
         loading={loading}
         confirmText="Тийм"
         cancelText="Үгүй"
@@ -1144,7 +1227,9 @@ function NotificationSettings() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<BondRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [expandedRequestId, setExpandedRequestId] = useState<string | null>(null);
+  const [expandedRequestId, setExpandedRequestId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -1256,38 +1341,50 @@ function NotificationSettings() {
 
               {/* Expanded detail view */}
               {expandedRequestId === request.id && (
-                <motion.div 
+                <motion.div
                   className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200"
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
+                  animate={{ opacity: 1, height: "auto" }}
                   transition={{ duration: 0.3 }}
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Left column - Form details */}
                     <div>
-                      <h4 className="font-medium text-gray-700 mb-2">Хүсэлтийн дэлгэрэнгүй</h4>
+                      <h4 className="font-medium text-gray-700 mb-2">
+                        Хүсэлтийн дэлгэрэнгүй
+                      </h4>
                       <div className="space-y-2">
                         {request.name && (
                           <>
                             <div className="flex justify-between">
                               <span className="text-gray-500">Нэр:</span>
-                              <span className="font-medium">{request.name}</span>
+                              <span className="font-medium">
+                                {request.name}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-500">Регистр:</span>
-                              <span className="font-medium">{request.registration || "N/A"}</span>
+                              <span className="font-medium">
+                                {request.registration || "N/A"}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-500">И-мэйл:</span>
-                              <span className="font-medium">{request.userEmail}</span>
+                              <span className="font-medium">
+                                {request.userEmail}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-500">Утас:</span>
-                              <span className="font-medium">{request.phone || "N/A"}</span>
+                              <span className="font-medium">
+                                {request.phone || "N/A"}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-500">Үнийн дүн:</span>
-                              <span className="font-medium">{request.price || "N/A"}</span>
+                              <span className="font-medium">
+                                {request.price || "N/A"}
+                              </span>
                             </div>
                           </>
                         )}
@@ -1296,24 +1393,30 @@ function NotificationSettings() {
 
                     {/* Right column - Bond details */}
                     <div>
-                      <h4 className="font-medium text-gray-700 mb-2">Бондын мэдээлэл</h4>
+                      <h4 className="font-medium text-gray-700 mb-2">
+                        Бондын мэдээлэл
+                      </h4>
                       <div className="space-y-2">
                         <div className="flex justify-between">
                           <span className="text-gray-500">ID:</span>
                           <span className="font-medium">{request.bondId}</span>
                         </div>
-                        
+
                         {request.nominalPrice && (
                           <div className="flex justify-between">
                             <span className="text-gray-500">Нэрлэсэн үнэ:</span>
-                            <span className="font-medium">{request.nominalPrice}</span>
+                            <span className="font-medium">
+                              {request.nominalPrice}
+                            </span>
                           </div>
                         )}
-                        
+
                         {request.unitPrice && (
                           <div className="flex justify-between">
                             <span className="text-gray-500">Нэгж үнэ:</span>
-                            <span className="font-medium">{request.unitPrice}</span>
+                            <span className="font-medium">
+                              {request.unitPrice}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -1323,8 +1426,14 @@ function NotificationSettings() {
                         <div className="mt-3">
                           <h5 className="text-gray-500 mb-1">Онцлогууд:</h5>
                           <ul className="list-disc list-inside space-y-1">
-                            {(request.features || request.bondFeatures || []).map((feature, index) => (
-                              <li key={index} className="text-sm text-gray-700">{feature}</li>
+                            {(
+                              request.features ||
+                              request.bondFeatures ||
+                              []
+                            ).map((feature, index) => (
+                              <li key={index} className="text-sm text-gray-700">
+                                {feature}
+                              </li>
                             ))}
                           </ul>
                         </div>

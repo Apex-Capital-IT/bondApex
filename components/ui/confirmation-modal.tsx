@@ -15,7 +15,7 @@ interface ConfirmationModalProps {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
-  message: string;
+  message: string | React.ReactNode;
   confirmText?: string;
   cancelText?: string;
   loading?: boolean;
@@ -32,13 +32,17 @@ export function ConfirmationModal({
   loading = false,
 }: ConfirmationModalProps) {
   return (
-    <Dialog className="opacity-100" open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="py-4">
-          <p className="text-sm text-gray-600">{message}</p>
+          {typeof message === "string" ? (
+            <p className="text-sm text-gray-600">{message}</p>
+          ) : (
+            message
+          )}
         </div>
         <DialogFooter>
           <Button

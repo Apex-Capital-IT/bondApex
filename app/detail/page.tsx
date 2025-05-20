@@ -14,122 +14,142 @@ const anton = Anton({
 
 export default function DetailPage() {
   return (
-    <div className="min-h-screen bg-white text-black relative overflow-hidden">
+    <div
+      className={`h-screen bg-white text-black flex flex-col ${anton.variable}`}
+    >
       {/* Background Image */}
-      <div className="absolute bottom-0 right-0 z-0 w-[400px] h-[500px]">
+      {/*
+        <div className="absolute inset-0 z-0">
         <Image
           src="/coin.png"
           alt="Background"
           fill
-          className="object-cover"
+          className="object-contain"
           priority
         />
       </div>
+  */}
 
       {/* Navigation */}
-      <nav className="fixed w-full top-0 z-50 flex justify-between items-center p-6 md:px-28 md:p-6 bg-white/10 backdrop-blur-md">
-        <Link href="/" className="flex items-center gap-2 text-black">
+      <nav className="fixed w-full top-0 z-20 flex justify-between items-center p-6 md:px-28 md:p-6">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-black hover:text-gray-700 transition-colors"
+        >
           <ArrowLeft className="w-5 h-5" />
           <span>Буцах</span>
         </Link>
-        <Image alt="Hydrogen Bond" width={105} height={105} src={"/Logo.svg"} />
+        <Image alt="Hydrogen Bond" width={90} height={90} src={"/Logo.svg"} />
       </nav>
 
       {/* Main Content */}
-      <main className="relative z-10 pt-32 px-6 md:px-28">
-        <div className="max-w-4xl mb-12 mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-12"
-          >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 font-[var(--font-anton)] text-transparent h-fit bg-clip-text bg-gradient-to-r from-blue-500/40 to-yellow-500/40">
-              Богино хугацаат бонд
-            </h1>
-            <p className="text-s text-gray-700">
+      <main className="relative z-10 pt-40 pb-10 px-6 md:px-28 flex-1 flex items-center justify-center">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start">
+          {/* Left Section: Text Content and Price Card */}
+          <div className="flex-1 md:pr-8">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-6xl md:text-8xl font-extrabold mb-8 text-black leading-tight font-anton"
+            >
+              Богино хугацаат <br /> бонд
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-xl text-gray-700 leading-relaxed max-w-2xl mb-16"
+            >
               Санхүүгийн хэрэглээндээ тохируулан богино хугацаанд уян хатан
               бондод хөрөнгө оруулах боломж. Албан байгууллагууд болон хувь
               хүмүүс харилцах дансандаа хүүгүй байршиж буй мөнгөн хөрөнгөө
               хугацаагүй бондод байршуулснаар мөнгөн хөрөнгөө үр өгөөжтэйгээр
               оновчтой удирдах шийдэл юм.
-            </p>
-          </motion.div>
+            </motion.p>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-8"
-          >
-            <div className="bg-white/10 backdrop-blur-xl p-8 rounded-2xl border-2 border-gradient-to-r from-blue-500/40 to-yellow-500/40">
-              <div className="relative">
-                <h2 className="text-2xl font-bold mb-4 text-black/90">
-                  Нөхцөл:
-                </h2>
-                <ul className="text-black/80 space-y-1">
-                  <li>
-                    Хүү – 15.0%-19.0% <br />
-                    <span className="text-sm text-black/60">
-                      /Ямар хугацаанд байршуулснаас хамаарч хүүгийн өгөөж
-                      шатласан байдлаар бодогдоно/
-                    </span>
-                  </li>
-                  <li className="mt-4 font-semibold">
-                    Хугацаа / Жилийн хүү (татварын өмнөх):
-                  </li>
-                  <li>1 сар хүртэлх — 14.0%</li>
-                  <li>3 сар хүртэлх — 15.0%</li>
-                  <li>5 сар хүртэлх — 16.0%</li>
-                  <li>7 сар хүртэлх — 17.0%</li>
-                  <li>9 сар хүртэлх — 18.0%</li>
-                  <li className="mt-4">Хугацаа – 7 хоногоос 12 сар хүртэлх</li>
-                  <li>Доод дүн - 50 сая төгрөг</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="bg-white/10 backdrop-blur-xl p-8 rounded-2xl border-2 border-gradient-to-r from-blue-500/40 to-yellow-500/40">
-              <div className="relative">
-                <h2 className="text-2xl font-bold mb-4 text-black/90">
-                  Давуу тал:
-                </h2>
-                <ul className="space-y-4 text-black/80">
-                  <li>
-                    • Хүссэн үедээ буцаан худалдах боломжтой ба хөрвөх чадвар
-                    өндөр
-                  </li>
-                  <li>
-                    • Богино хугацаанд ашиглахаар төлөвлөсөн хөрөнгөөс өгөөж
-                    хүртэх
-                  </li>
-                  <li>• Мөнгөн урсгалын оновчтой удирдлага</li>
-                  <li>• Эзэмшсэн 1 хоногт ч хүү бодох нөхцөлтэй</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="bg-white/10 backdrop-blur-xl p-8 rounded-2xl border-2 border-gradient-to-r from-blue-500/40 to-yellow-500/40">
-              <div className="relative">
-                <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-                  <a
-                    href="https://www.facebook.com/apexcapital.mn"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full sm:w-auto px-6 py-3 text-center text-sm sm:text-base bg-gradient-to-r from-blue-500/40 to-yellow-500/40 text-white rounded-lg transition-colors"
-                  >
-                    Мэдээлэл авах
-                  </a>
-                  <a
-                    href="tel:75107500"
-                    className="w-full sm:w-auto px-6 py-3 text-center text-sm sm:text-base bg-gradient-to-r from-blue-500/40 to-yellow-500/40 text-white rounded-lg transition-colors"
-                  >
-                    Холбогдох
-                  </a>
+          {/* Right Section: Давуу тал and Holbogdoh */}
+          <div className="flex-1 flex flex-col justify-end h-full pb-20 md:pb-0">
+            {/* Нөхцөл items styled like features - Moved to the right */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+              <div className="flex flex-col gap-2">
+                <label className="text-gray-600 text-lg">Хүү</label>
+                <div className="bg-white p-4 rounded-lg shadow-sm text-gray-900 text-lg">
+                  15.0% - 19.0%
                 </div>
               </div>
-            </div>
-          </motion.div>
+              <div className="flex flex-col gap-2">
+                <label className="text-gray-600 text-lg">Хугацаа</label>
+                <div className="bg-white p-4 rounded-lg shadow-sm text-gray-900 text-lg">
+                  7 хоногоос 12 сар хүртэлх
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-gray-600 text-lg">Доод дүн</label>
+                <div className="bg-white p-4 rounded-lg shadow-sm text-gray-900 text-lg">
+                  50 сая төгрөг
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-gray-600 text-lg">
+                  Хөрвөх чадвар өндөр
+                </label>
+                <div className="bg-white p-4 rounded-lg shadow-sm text-gray-900 text-lg">
+                  Хүссэн үедээ буцаан худалдах боломжтой
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-gray-600 text-lg">Өгөөж хүртэх</label>
+                <div className="bg-white p-4 rounded-lg shadow-sm text-gray-900 text-lg">
+                  Богино хугацаанд ашиглахаар төлөвлөсөн хөрөнгөөс
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-gray-600 text-lg">
+                  Хүү бодох нөхцөлтэй
+                </label>
+                <div className="bg-white p-4 rounded-lg shadow-sm text-gray-900 text-lg">
+                  Эзэмжсэн 1 хоногт ч
+                </div>
+              </div>
+
+              {/* Холбогдох links - styled similarly */}
+              <div className="flex flex-col gap-2">
+                <label className="text-gray-600 text-lg">Мэдээлэл авах</label>
+                <a
+                  href="https://www.facebook.com/apexcapital.mn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-700 text-lg underline hover:no-underline"
+                >
+                  <div className="bg-white p-4 rounded-lg shadow-sm text-gray-900 text-lg">
+                    Facebook
+                  </div>
+                </a>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-gray-600 text-lg">Холбогдох</label>
+                <a
+                  href="tel:75107500"
+                  className="text-gray-700 text-lg underline hover:no-underline"
+                >
+                  <div className="bg-white p-4 rounded-lg shadow-sm text-gray-900 text-lg">
+                    75107500
+                  </div>
+                </a>
+              </div>
+            </motion.div>
+
+            {/* Horizontal features like in the image */}
+          </div>
         </div>
       </main>
     </div>

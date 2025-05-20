@@ -8,11 +8,24 @@ import { useState, useRef, useEffect } from "react";
 
 export default function LeftAdSection() {
   const [showDetail, setShowDetail] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const detailRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    function handleScroll() {
+      setIsScrolled(window.scrollY > 0);
+    }
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (detailRef.current && !detailRef.current.contains(event.target as Node)) {
+      if (
+        detailRef.current &&
+        !detailRef.current.contains(event.target as Node)
+      ) {
         setShowDetail(false);
       }
     }
@@ -28,7 +41,11 @@ export default function LeftAdSection() {
       <motion.div
         whileHover={{ x: 10 }}
         whileTap={{ scale: 0.95 }}
-        className="group relative flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 hover:from-blue-500/30 hover:to-yellow-500/30 border border-white/30 shadow-lg transition-all overflow-visible"
+        className={`group relative flex items-center justify-center w-12 h-12 rounded-full ${
+          isScrolled
+            ? "bg-gradient-to-r from-blue-500/20 to-yellow-500/20"
+            : "bg-[#1782e0]"
+        } hover:from-blue-500/30 hover:to-yellow-500/30 border border-white/30 shadow-lg transition-all overflow-visible`}
       >
         <div
           className="w-full h-full flex items-center justify-center cursor-pointer"
@@ -38,13 +55,13 @@ export default function LeftAdSection() {
             }
           }}
         >
-          <Youtube size={24} className="text-gray-600" />
+          <Youtube size={24} className={`${isScrolled ? 'text-gray-600' : 'text-white'}`} />
         </div>
         <div className="absolute -left-2 top-1/2 -translate-y-1/2 hidden md:group-hover:block transition-all duration-300 z-50">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center justify-center w-24 h-32 md:w-[100px] md:h-[160px] rounded-2xl bg-gradient-to-r from-blue-500/20 to-yellow-500/20 border border-white/30 shadow-lg overflow-hidden relative"
+            className="flex items-center justify-center w-24 h-32 md:w-[100px] md:h-[160px] rounded-2xl bg-[#1782e0] border border-white/30 shadow-lg overflow-hidden relative"
           >
             <div className="relative w-full h-full">
               <Image

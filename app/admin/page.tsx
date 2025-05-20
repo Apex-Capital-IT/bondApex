@@ -1,63 +1,63 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
-  const [code, setCode] = useState('');
-  const [error, setError] = useState('');
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
 
   useEffect(() => {
     // Check if there's a saved code in localStorage
-    const savedCode = localStorage.getItem('adminCode');
-    const savedTime = localStorage.getItem('adminCodeTime');
-    
+    const savedCode = localStorage.getItem("adminCode");
+    const savedTime = localStorage.getItem("adminCodeTime");
+
     if (savedCode && savedTime) {
       const currentTime = new Date().getTime();
       const savedTimeNum = parseInt(savedTime);
       const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
-      
+
       if (currentTime - savedTimeNum < fiveMinutes) {
-        router.push('/admin/dashboard');
+        router.push("/admin/dashboard");
       } else {
         // Clear expired code
-        localStorage.removeItem('adminCode');
-        localStorage.removeItem('adminCodeTime');
+        localStorage.removeItem("adminCode");
+        localStorage.removeItem("adminCodeTime");
       }
     }
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     try {
-      console.log('Submitting code:', code);
-      const response = await fetch('/api/admin/verify', {
-        method: 'POST',
+      console.log("Submitting code:", code);
+      const response = await fetch("/api/admin/verify", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ code }),
       });
 
       const data = await response.json();
-      console.log('Response:', data);
+      console.log("Response:", data);
 
       if (response.ok) {
         // Save the code and current time to localStorage
-        localStorage.setItem('adminCode', code);
-        localStorage.setItem('adminCodeTime', new Date().getTime().toString());
-        console.log('Verification successful, redirecting...');
-        router.push('/admin/dashboard');
+        localStorage.setItem("adminCode", code);
+        localStorage.setItem("adminCodeTime", new Date().getTime().toString());
+        console.log("Verification successful, redirecting...");
+        router.push("/admin/dashboard");
       } else {
-        console.log('Verification failed:', data.error);
-        setError(data.error || 'Invalid security code');
+        console.log("Verification failed:", data.error);
+        setError(data.error || "Invalid security code");
       }
     } catch (err) {
-      console.error('Error during verification:', err);
-      setError('An error occurred. Please try again.');
+      console.error("Error during verification:", err);
+      setError("An error occurred. Please try again.");
     }
   };
 
@@ -96,7 +96,7 @@ export default function AdminPage() {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               Verify
             </button>
@@ -105,4 +105,4 @@ export default function AdminPage() {
       </div>
     </div>
   );
-} 
+}

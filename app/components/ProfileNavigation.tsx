@@ -35,11 +35,9 @@ export default function Navigation() {
   return (
     <motion.nav
       className={`fixed top-0 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${
-        mobileMenuOpen
-          ? `bg-white text-black shadow-md rounded-t-3xl mt-2`
-          : isScrolled
-          ? `bg-white text-black shadow-md rounded-3xl mt-2`
-          : "bg-transparent text-white"
+        isScrolled
+          ? "bg-white text-black shadow-md rounded-3xl mt-2"
+          : "bg-transparent text-black"
       }`}
       style={{
         opacity: isScrolled ? 1 : headerOpacity,
@@ -47,7 +45,7 @@ export default function Navigation() {
         backdropFilter: isScrolled ? undefined : `blur(${headerBlur}px)`,
       }}
     >
-      <div className="container mx-auto px-4 py-4 sm:p-6 md:px-12 flex justify-between items-center">
+      <div className="container mx-auto px-4 sm:p-6 md:px-12 flex justify-between items-center">
         <Link href={"/"} className="flex items-center">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -120,11 +118,10 @@ export default function Navigation() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="absolute top-full left-0 w-full bg-white shadow-lg md:hidden rounded-b-3xl"
+            className="absolute top-full left-0 w-full bg-white shadow-lg md:hidden"
           >
             <div className="flex flex-col p-4 space-y-4">
               <Link
-                target="_blank"
                 href="https://www.facebook.com/apexcapital.mn"
                 className="px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg"
                 onClick={() => setMobileMenuOpen(false)}
@@ -139,7 +136,7 @@ export default function Navigation() {
                 For Company
               </Link>
               <Link
-                href="/about"
+                href="https://www.facebook.com/apexcapital.mn"
                 className="px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -228,10 +225,9 @@ export default function Navigation() {
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <Link
-              target="_blank"
               href="https://www.facebook.com/apexcapital.mn"
               className={`font-bold transition-colors ${
-                isScrolled ? "text-black" : "text-white"
+                isScrolled ? "text-black" : "text-black"
               }`}
             >
               Contact us{" "}
@@ -245,7 +241,7 @@ export default function Navigation() {
             <Link
               href="coming-soon"
               className={`font-bold transition-colors ${
-                isScrolled ? "text-black" : "text-white"
+                isScrolled ? "text-black" : "text-black"
               }`}
             >
               For Company
@@ -257,9 +253,9 @@ export default function Navigation() {
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <Link
-              href="/about"
+              href="https://www.facebook.com/apexcapital.mn"
               className={`font-bold transition-colors ${
-                isScrolled ? "text-black" : "text-white"
+                isScrolled ? "text-black" : "text-black"
               }`}
             >
               About us
@@ -285,7 +281,7 @@ export default function Navigation() {
                   className={`px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border transition-all shadow-lg flex items-center gap-2 ${
                     isScrolled
                       ? "text-black border-black/30"
-                      : "text-white border-white/30"
+                      : "text-black border-white/30"
                   }`}
                 >
                   {user.profileImage ? (
@@ -342,7 +338,7 @@ export default function Navigation() {
                 <Link
                   href="/signup"
                   className={`px-4 py-2 text-sm rounded-full bg-gradient-to-r backdrop-blur-xl border border-white/30 transition-all shadow-lg ${
-                    isScrolled ? "text-black border-black/30" : "text-white"
+                    isScrolled ? "text-black border-black/30" : "text-black"
                   }`}
                 >
                   Бүртгүүлэх
@@ -356,7 +352,7 @@ export default function Navigation() {
                 <Link
                   href="/login"
                   className={`px-4 py-2 text-sm rounded-full bg-gradient-to-r backdrop-blur-xl border border-white/30 transition-all shadow-lg ${
-                    isScrolled ? "text-black border-black/30" : "text-white"
+                    isScrolled ? "text-black border-black/30" : "text-black"
                   }`}
                 >
                   Нэвтрэх

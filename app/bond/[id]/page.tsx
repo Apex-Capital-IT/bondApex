@@ -9,8 +9,31 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Anton } from "next/font/google";
 
-const bonds = [
+const anton = Anton({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-anton",
+});
+
+interface Bond {
+  id: string;
+  title: string;
+  features: string[];
+  image: string;
+}
+
+interface FormData {
+  name: string;
+  registration: string;
+  email: string;
+  phone: string;
+  price: string;
+  [key: string]: string; // Add index signature
+}
+
+const bonds: Bond[] = [
   {
     id: "1",
     title: "БАЯЛАГ БҮТЭЭГЧ БОНД 1",
@@ -60,7 +83,7 @@ export default function BondPage() {
   const router = useRouter();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     registration: "",
     email: "",
@@ -82,6 +105,8 @@ export default function BondPage() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!bond) return;
+
     setIsRequesting(true);
 
     const nominalPrice = bond.features.find((feature) =>
@@ -147,97 +172,103 @@ export default function BondPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Link
-          href="/"
-          className="flex items-center text-gray-600 hover:text-gray-900 mb-8"
-        >
-          <ArrowLeft className="mr-2" size={20} />
-          Буцах
-        </Link>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-12"
-        >
-          <div className="relative h-[400px] md:h-[600px] rounded-xl overflow-hidden">
-            <Image
-              src={bond.image}
-              alt={bond.title}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-
-          <div className="flex flex-col justify-center">
-            <motion.h1
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-4xl font-bold mb-6"
-            >
-              {bond.title}
-            </motion.h1>
+    <div
+      className={`min-h-screen font-['Cormorant_Garamond'] flex flex-col ${anton.variable}`}
+    >
+      <div className="bg-white text-black overflow-hidden flex flex-col flex-1">
+        <div className="w-full min-h-screen bg-gradient-to-br from-[white] via-[#004a85] to-[#1782e0] pt-16 pb-12 flex items-center relative">
+          <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-white via-[#1782e0]/90 to-transparent"></div>
+          <div className="container mx-auto px-4 relative z-10">
+            <Link href="/" className="flex items-center text-black mb-8">
+              <ArrowLeft className="mr-2 " size={20} />
+              Буцах
+            </Link>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.6 }}
-              className="space-y-4"
+              transition={{ duration: 0.5 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-12"
             >
-              {bond.features.map((feature, index) => (
-                <motion.div
-                  key={index}
+              <div className="relative h-[400px] md:h-[600px] rounded-2xl overflow-hidden shadow-2xl">
+                <Image
+                  src={bond.image}
+                  alt={bond.title}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+
+              <div className="flex flex-col justify-center">
+                <motion.h1
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
-                  className="flex items-center gap-3"
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="text-4xl md:text-6xl font-black text-white mb-6"
                 >
-                  <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20" />
-                  <span className="text-gray-700">{feature}</span>
-                </motion.div>
-              ))}
-            </motion.div>
+                  {bond.title}
+                </motion.h1>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1 }}
-              className="mt-8 space-y-4"
-            >
-              <button
-                onClick={handleRequest}
-                disabled={isRequesting}
-                className="w-full md:w-auto bg-gradient-to-r from-blue-500/20 to-yellow-500/20 text-black py-3 px-8 rounded-lg hover:from-blue-500/30 hover:to-yellow-500/30 transition-all disabled:opacity-50"
-              >
-                {isRequesting ? "Илгээж байна..." : "Форм бөглөх"}
-              </button>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.6 }}
+                  className="space-y-4"
+                >
+                  {bond.features.map((feature, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
+                      className="flex items-center gap-3"
+                    >
+                      <div className="w-2 h-2 rounded-full bg-white/50" />
+                      <span className="text-white/90 text-lg">{feature}</span>
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 1 }}
+                  className="mt-8 space-y-4"
+                >
+                  <button
+                    onClick={handleRequest}
+                    disabled={isRequesting}
+                    className="w-full md:w-auto bg-white text-[#1782e0] hover:bg-white/90 px-8 py-6 text-lg font-semibold rounded-full shadow-sm transition-colors disabled:opacity-50"
+                  >
+                    {isRequesting ? "Илгээж байна..." : "Форм бөглөх"}
+                  </button>
+                </motion.div>
+              </div>
             </motion.div>
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Modal for Form */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg relative"
+            className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg relative"
           >
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-2 right-2 text-2xl text-gray-600 hover:text-gray-900"
+              className="absolute top-4 right-4 text-2xl text-gray-600 hover:text-gray-900"
             >
               &times;
             </button>
 
-            <h2 className="text-2xl font-bold mb-6 text-center">Мэдээлэл</h2>
+            <h2 className="text-3xl font-bold mb-6 text-center font-[var(--font-anton)] text-transparent bg-clip-text bg-gradient-to-r from-blue-500/40 to-yellow-500/40">
+              Мэдээлэл
+            </h2>
 
             <form onSubmit={handleFormSubmit}>
               {[
@@ -250,7 +281,7 @@ export default function BondPage() {
                 <div key={field.id} className="mb-4">
                   <label
                     htmlFor={field.id}
-                    className="block text-lg font-semibold"
+                    className="block text-lg font-semibold text-gray-700"
                   >
                     {field.label}
                   </label>
@@ -259,7 +290,7 @@ export default function BondPage() {
                     id={field.id}
                     value={formData[field.id]}
                     onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-md"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/20 transition-all"
                     required
                   />
                 </div>
@@ -271,7 +302,7 @@ export default function BondPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="w-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 text-black py-3 px-6 rounded-md transition-all disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 text-black py-4 px-6 rounded-lg text-lg font-semibold transition-all disabled:opacity-50 hover:from-blue-500/30 hover:to-yellow-500/30"
               >
                 {isRequesting ? "Илгээж байна..." : "Илгээх"}
               </motion.button>
