@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSaleRequests, updateSaleRequest } from "@/app/models/saleRequest";
+import { getSaleRequests, updateSaleRequest } from "@/app/models/SaleRequest";
 
 export async function GET() {
   try {
