@@ -7,7 +7,8 @@ import path from 'path';
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const name = formData.get('name') as string;
+    const firstName = formData.get('firstName') as string;
+    const lastName = formData.get('lastName') as string;
     const email = formData.get('email') as string;
     const userId = formData.get('userId') as string;
     const currentPassword = formData.get('currentPassword') as string;
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
     const profileImage = formData.get('profileImage') as File | null;
 
     // Validate required fields
-    if (!name || !userId) {
+    if (!firstName || !lastName || !userId) {
       return NextResponse.json(
         { error: 'Нэр болон хэрэглэгчийн ID шаардлагатай' },
         { status: 400 }
@@ -36,7 +37,8 @@ export async function POST(request: Request) {
 
     // Prepare update data
     const updateData: any = {
-      username: name,
+      firstName,
+      lastName,
       email
     };
 

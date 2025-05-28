@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   BarChart3,
   Bell,
@@ -25,6 +25,11 @@ import {
   LogOut,
   HelpCircle,
   Palette,
+  ArrowLeft,
+  Check,
+  X,
+  AlertCircle,
+  CreditCard,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -60,6 +65,20 @@ import {
   Legend,
 } from "chart.js";
 import type { ChartOptions, TooltipItem } from "chart.js";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { format } from "date-fns";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 ChartJS.register(
   CategoryScale,
@@ -70,6 +89,36 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
+interface BondRequest {
+  _id: string;
+  id: string;
+  bondId: string;
+  userEmail: string;
+  status: "pending" | "accepted" | "rejected";
+  timestamp: string;
+  price?: string;
+  name?: string;
+  registration?: string;
+  bondTitle?: string;
+  phone?: string;
+  nominalPrice?: string;
+  unitPrice?: string;
+  features?: string[];
+  bondFeatures?: string[];
+  declineReason?: string;
+  saleRequest?: {
+    status: "pending" | "accepted" | "normal";
+    timestamp?: string;
+    price?: {
+      originalPrice: string;
+      sellPrice: string;
+      interestRate: number;
+      daysHeld: number;
+      interestAmount: string;
+    };
+  };
+}
 
 // Mongolian mock data
 const mockData = {
@@ -301,15 +350,38 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [activeSidebar, setActiveSidebar] = useState("dashboard");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedButeegdehuun, setSelectedButeegdehuun] = useState("1");
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const [isSaleModalOpen, setIsSaleModalOpen] = useState(false);
+  const [selectedBondForSale, setSelectedBondForSale] = useState<{
+    bondId: string;
+    price: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
+  // If loading or not authenticated, show loading state
+  if (loading || !user) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600">Түр хүлээнэ үү...</p>
+        </div>
+      </div>
+    );
+  }
 
   const sidebarItems = [
     { id: "dashboard", icon: Grid3X3, label: "Хяналтын самбар" },
     { id: "statistics", icon: BarChart3, label: "Статистик" },
     { id: "history", icon: Clock, label: "Түүх" },
   ];
-
-  // Add state for selected бүтээгдэхүүн
-  const [selectedButeegdehuun, setSelectedButeegdehuun] = useState("1");
 
   // Filter data based on search query
   const filterData = (data: any[], searchFields: string[]) => {
@@ -325,187 +397,515 @@ export default function AdminDashboard() {
   };
 
   const DashboardView = () => {
-    const filteredData = filterData(mockData.dashboard, ["title", "value"]);
+    const [requests, setRequests] = useState<BondRequest[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [expandedRequestId, setExpandedRequestId] = useState<string | null>(
+      null
+    );
+    const [selectedView, setSelectedView] = useState<
+      "details" | "payment" | null
+    >(null);
+    const { user } = useAuth();
 
-    // Different dashboard data based on selected бүтээгдэхүүн
-    const getButeegdehuunData = () => {
-      switch (selectedButeegdehuun) {
-        case "1":
-          return {
-            title: "Бүтээгдэхүүн 1",
-            metrics: [
-              { title: "Нийт орлого", value: "₮35,231,890", change: "+15.1%" },
-              { title: "Захиалгууд", value: "1,850", change: "+120.1%" },
-              { title: "Бүтээгдэхүүн", value: "8,234", change: "+12%" },
-              { title: "Идэвхтэй хэрэглэгчид", value: "423", change: "+151%" },
-            ],
-          };
-        case "2":
-          return {
-            title: "Бүтээгдэхүүн 2",
-            metrics: [
-              { title: "Нийт орлого", value: "₮55,231,890", change: "+25.1%" },
-              { title: "Захиалгууд", value: "2,850", change: "+180.1%" },
-              { title: "Бүтээгдэхүүн", value: "15,234", change: "+22%" },
-              { title: "Идэвхтэй хэрэглэгчид", value: "673", change: "+251%" },
-            ],
-          };
-        case "3":
-          return {
-            title: "Бүтээгдэхүүн 3",
-            metrics: [
-              { title: "Нийт орлого", value: "₮65,231,890", change: "+30.1%" },
-              { title: "Захиалгууд", value: "3,850", change: "+220.1%" },
-              { title: "Бүтээгдэхүүн", value: "18,234", change: "+28%" },
-              { title: "Идэвхтэй хэрэглэгчид", value: "773", change: "+301%" },
-            ],
-          };
-        case "4":
-          return {
-            title: "Бүтээгдэхүүн 4",
-            metrics: [
-              { title: "Нийт орлого", value: "₮75,231,890", change: "+35.1%" },
-              { title: "Захиалгууд", value: "4,850", change: "+280.1%" },
-              { title: "Бүтээгдэхүүн", value: "22,234", change: "+32%" },
-              { title: "Идэвхтэй хэрэглэгчид", value: "873", change: "+351%" },
-            ],
-          };
-        default:
-          return {
-            title: "Бүтээгдэхүүн 1",
-            metrics: [
-              { title: "Нийт орлого", value: "₮35,231,890", change: "+15.1%" },
-              { title: "Захиалгууд", value: "1,850", change: "+120.1%" },
-              { title: "Бүтээгдэхүүн", value: "8,234", change: "+12%" },
-              { title: "Идэвхтэй хэрэглэгчид", value: "423", change: "+151%" },
-            ],
-          };
+    useEffect(() => {
+      const fetchRequests = async () => {
+        try {
+          const response = await fetch("/api/bond/requests");
+          if (response.ok) {
+            const data = await response.json();
+            const userRequests = data.filter(
+              (request: BondRequest) => request.userEmail === user?.email
+            );
+            setRequests(userRequests);
+          }
+        } catch (error) {
+          console.error("Error fetching requests:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      if (user?.email) {
+        fetchRequests();
+      }
+    }, [user?.email]);
+
+    const handleSaleRequest = async (bondId: string, originalPrice: string) => {
+      try {
+        const response = await fetch("/api/bond/sale-request", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            bondId,
+            userEmail: user?.email,
+            originalPrice,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Failed to create sale request");
+        }
+
+        // Show success toast
+        toast.success("Зарах хүсэлт амжилттай илгээгдлээ!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+          style: {
+            fontSize: "14px",
+            fontWeight: 500,
+          },
+        });
+
+        // Close the modal
+        setIsSaleModalOpen(false);
+        setSelectedBondForSale(null);
+
+        // Refresh the requests list
+        const updatedResponse = await fetch("/api/bond/requests");
+        if (updatedResponse.ok) {
+          const data = await updatedResponse.json();
+          const userRequests = data.filter(
+            (request: BondRequest) => request.userEmail === user?.email
+          );
+          setRequests(userRequests);
+        }
+      } catch (error) {
+        console.error("Error creating sale request:", error);
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Failed to create sale request",
+          {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+            style: {
+              fontSize: "14px",
+              fontWeight: 500,
+            },
+          }
+        );
       }
     };
 
-    const buteegdehuunData = getButeegdehuunData();
+    const openSaleModal = (bondId: string, price: string) => {
+      setSelectedBondForSale({ bondId, price });
+      setIsSaleModalOpen(true);
+    };
+
+    const getStatusIcon = (status: string) => {
+      switch (status) {
+        case "accepted":
+          return <Check className="w-5 h-5 text-green-500" />;
+        case "declined":
+          return <X className="w-5 h-5 text-red-500" />;
+        case "pending":
+          return <Clock className="w-5 h-5 text-yellow-500" />;
+        default:
+          return <AlertCircle className="w-5 h-5 text-gray-500" />;
+      }
+    };
+
+    const getStatusColor = (status: string) => {
+      switch (status) {
+        case "accepted":
+          return "bg-green-100 text-green-800";
+        case "declined":
+          return "bg-red-100 text-red-800";
+        case "pending":
+          return "bg-yellow-100 text-yellow-800";
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    };
+
+    const calculatePayment = (amount: number, days: number) => {
+      const annualRate = 0.19; // 19% annual rate
+      const dailyRate = annualRate / 365;
+      const interest = amount * dailyRate * days;
+      return amount + interest;
+    };
+
+    const handleViewChange = (
+      requestId: string,
+      view: "details" | "payment"
+    ) => {
+      if (expandedRequestId === requestId && selectedView === view) {
+        setExpandedRequestId(null);
+        setSelectedView(null);
+      } else {
+        setExpandedRequestId(requestId);
+        setSelectedView(view);
+      }
+    };
+
+    if (isLoading) {
+      return (
+        <div className="flex justify-center items-center min-h-[200px]">
+          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      );
+    }
 
     return (
       <div className="space-y-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-gray-900">
-            {buteegdehuunData.title}
+            Хөрөнгө оруулалтын хүсэлтүүд
           </h2>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-[200px] justify-between">
-                Бүтээгдэхүүн {selectedButeegdehuun}
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
-              <DropdownMenuItem onClick={() => setSelectedButeegdehuun("1")}>
-                Бүтээгдэхүүн 1
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSelectedButeegdehuun("2")}>
-                Бүтээгдэхүүн 2
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSelectedButeegdehuun("3")}>
-                Бүтээгдэхүүн 3
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSelectedButeegdehuun("4")}>
-                Бүтээгдэхүүн 4
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {buteegdehuunData.metrics.map((item, index) => (
-            <Card
-              key={index}
-              className="overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-200"
-            >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
+        <div className="space-y-3 sm:space-y-4">
+          {requests.length === 0 ? (
+            <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm">
+              <p className="text-gray-600">
+                Хөрөнгө оруулалтын хүсэлт оруулаагүй байна
+              </p>
+            </div>
+          ) : (
+            requests.map((request) => (
+              <motion.div
+                key={request.id}
+                className="bg-white rounded-lg p-4 sm:p-6 shadow-sm"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">{item.title}</p>
-                    <p className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-                      {item.value}
+                    <h3 className="font-medium text-gray-900">
+                      {request.bondTitle}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {format(new Date(request.timestamp), "PPP p")}
                     </p>
                   </div>
-                  <div
-                    className={`flex items-center gap-1 px-2 py-1 rounded-lg ${
-                      item.change.startsWith("+")
-                        ? "bg-green-50 text-green-600"
-                        : "bg-red-50 text-red-600"
-                    }`}
-                  >
-                    {item.change.startsWith("+") ? (
-                      <TrendingUp className="w-4 h-4" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4" />
-                    )}
-                    <span className="text-sm font-medium">{item.change}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="border-none shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold">
-                Сүүлийн үйл ажиллагаа
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {mockData.history.slice(0, 3).map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">
-                        {item.action}
-                      </p>
-                      <p className="text-xs text-gray-500">{item.timestamp}</p>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`flex items-center gap-2 px-3 py-1 rounded-md ${getStatusColor(
+                        request.status
+                      )}`}
+                    >
+                      {getStatusIcon(request.status)}
+                      <span className="capitalize">{request.status}</span>
                     </div>
+                    {request.status === "accepted" && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() =>
+                            handleViewChange(request.id, "details")
+                          }
+                          className={`flex items-center gap-2 px-3 py-1 rounded-md transition-colors ${
+                            expandedRequestId === request.id &&
+                            selectedView === "details"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }`}
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span>Дэлгэрэнгүй</span>
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleViewChange(request.id, "payment")
+                          }
+                          className={`flex items-center gap-2 px-3 py-1 rounded-md transition-colors ${
+                            expandedRequestId === request.id &&
+                            selectedView === "payment"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          }`}
+                        >
+                          <CreditCard className="w-4 h-4" />
+                          <span>тооцоолуур</span>
+                        </button>
+                        {(!request.saleRequest ||
+                          request.saleRequest.status === "normal") && (
+                          <button
+                            onClick={() =>
+                              openSaleModal(
+                                request.bondId,
+                                request.price || "0"
+                              )
+                            }
+                            className="flex items-center gap-2 px-3 py-1 rounded-md bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                          >
+                            <ShoppingCart className="w-4 h-4" />
+                            <span>Зарах</span>
+                          </button>
+                        )}
+                        {request.saleRequest &&
+                          request.saleRequest.status !== "normal" && (
+                            <div
+                              className={`flex items-center gap-2 px-3 py-1 rounded-md ${
+                                request.saleRequest.status === "pending"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : request.saleRequest.status === "accepted"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-gray-100 text-gray-700"
+                              }`}
+                            >
+                              <ShoppingCart className="w-4 h-4" />
+                              <div className="flex flex-col">
+                                <span>
+                                  {request.saleRequest.status === "pending"
+                                    ? "Хүсэлт илгээгдсэн"
+                                    : request.saleRequest.status === "accepted"
+                                    ? "Зарах хүсэлт зөвшөөрөгдсөн"
+                                    : "Хэвийн"}
+                                </span>
+                                {request.saleRequest.price && (
+                                  <span className="text-xs">
+                                    Зарах үнэ:{" "}
+                                    {request.saleRequest.price.sellPrice}₮
+                                    <br />
+                                    Хүү:{" "}
+                                    {request.saleRequest.price.interestAmount}₮
+                                    <br />
+                                    Хугацаа:{" "}
+                                    {request.saleRequest.price.daysHeld} хоног
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </div>
 
-          <Card className="border-none shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold">
-                Хурдан статистик
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <span className="text-sm text-gray-600">
-                    Идэвхтэй кампайнууд
-                  </span>
-                  <span className="font-semibold text-gray-900">3</span>
-                </div>
-                <div className="flex justify-between items-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <span className="text-sm text-gray-600">
-                    Нийт хэрэглэгчид
-                  </span>
-                  <span className="font-semibold text-gray-900">1,234</span>
-                </div>
-                <div className="flex justify-between items-center p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <span className="text-sm text-gray-600">
-                    Хүлээгдэж буй захиалга
-                  </span>
-                  <span className="font-semibold text-gray-900">45</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                {/* Expanded view */}
+                {expandedRequestId === request.id && (
+                  <motion.div
+                    className="mt-4"
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {selectedView === "details" && (
+                      <div className="p-3 bg-gray-50 rounded-md border border-gray-200">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* Left column - Form details */}
+                          <div>
+                            <h4 className="font-medium text-gray-700 mb-2">
+                              Хүсэлтийн дэлгэрэнгүй
+                            </h4>
+                            <div className="space-y-2">
+                              {request.name && (
+                                <>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">Нэр:</span>
+                                    <span className="font-medium">
+                                      {request.name}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">
+                                      Регистр:
+                                    </span>
+                                    <span className="font-medium">
+                                      {request.registration || "N/A"}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">
+                                      И-мэйл:
+                                    </span>
+                                    <span className="font-medium">
+                                      {request.userEmail}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">Утас:</span>
+                                    <span className="font-medium">
+                                      {request.phone || "N/A"}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-500">
+                                      Үнийн дүн:
+                                    </span>
+                                    <span className="font-medium">
+                                      {request.price || "N/A"}
+                                    </span>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Right column - Bond details */}
+                          <div>
+                            <h4 className="font-medium text-gray-700 mb-2">
+                              Бондын мэдээлэл
+                            </h4>
+                            <div className="space-y-2">
+                              <div className="flex justify-between">
+                                <span className="text-gray-500">ID:</span>
+                                <span className="font-medium">
+                                  {request.bondId}
+                                </span>
+                              </div>
+
+                              {request.nominalPrice && (
+                                <div className="flex justify-between">
+                                  <span className="text-gray-500">
+                                    Нэрлэсэн үнэ:
+                                  </span>
+                                  <span className="font-medium">
+                                    {request.nominalPrice}
+                                  </span>
+                                </div>
+                              )}
+
+                              {request.unitPrice && (
+                                <div className="flex justify-between">
+                                  <span className="text-gray-500">
+                                    Нэгж үнэ:
+                                  </span>
+                                  <span className="font-medium">
+                                    {request.unitPrice}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Features List */}
+                            {(request.features || request.bondFeatures) && (
+                              <div className="mt-3">
+                                <h5 className="text-gray-500 mb-1">
+                                  Онцлогууд:
+                                </h5>
+                                <ul className="list-disc list-inside space-y-1">
+                                  {(
+                                    request.features ||
+                                    request.bondFeatures ||
+                                    []
+                                  ).map((feature: string, index: number) => (
+                                    <li
+                                      key={index}
+                                      className="text-sm text-gray-700"
+                                    >
+                                      {feature}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedView === "payment" && (
+                      <div className="p-3 bg-gray-50 rounded-md border border-gray-200">
+                        <h4 className="font-medium text-gray-700 mb-3">
+                          Төлбөрийн тооцоо
+                        </h4>
+                        <div className="space-y-2">
+                          {[
+                            { label: "Өнөөдөр", days: 0 },
+                            { label: "7 хоногийн дараа", days: 7 },
+                            { label: "1 сарын дараа", days: 30 },
+                            { label: "6 сарын дараа", days: 180 },
+                            { label: "1 жилийн дараа", days: 365 },
+                          ].map((option) => {
+                            const amount = parseFloat(
+                              request.price?.replace(/[^0-9.-]+/g, "") || "0"
+                            );
+                            const totalAmount = calculatePayment(
+                              amount,
+                              option.days
+                            );
+                            const interest = totalAmount - amount;
+
+                            return (
+                              <div
+                                key={option.label}
+                                className="flex justify-between items-center p-2 hover:bg-gray-100 rounded-md transition-colors"
+                              >
+                                <div>
+                                  <p className="font-medium text-gray-900">
+                                    {option.label}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    Хүү: {interest.toLocaleString()}₮
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-bold text-gray-900">
+                                    {totalAmount.toLocaleString()}₮
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    {option.days > 0
+                                      ? `${option.days} хоног`
+                                      : "Өнөөдөр"}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {request.declineReason && (
+                      <div className="mt-3 sm:mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                        <p className="font-medium">Татгалзсан шалтгаан:</p>
+                        <p>{request.declineReason}</p>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </motion.div>
+            ))
+          )}
         </div>
+
+        {/* Sale Confirmation Modal */}
+        <Dialog open={isSaleModalOpen} onOpenChange={setIsSaleModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Бонд зарах</DialogTitle>
+              <DialogDescription>
+                Та энэ бондыг зарахдаа итгэлтэй байна уу? Энэ үйлдлийг буцаах
+                боломжгүй.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <button
+                onClick={() => setIsSaleModalOpen(false)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                Цуцлах
+              </button>
+              <button
+                onClick={() =>
+                  selectedBondForSale &&
+                  handleSaleRequest(
+                    selectedBondForSale.bondId,
+                    selectedBondForSale.price
+                  )
+                }
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              >
+                Зарах
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   };
@@ -1182,10 +1582,30 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex h-screen bg-gray-50">
+      {/* Add ToastContainer */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+
       {/* Sidebar */}
       <div className="w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm">
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.back()}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
             <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center shadow-md">
               <span className="text-white font-bold text-lg">$$</span>
             </div>
@@ -1225,17 +1645,25 @@ export default function AdminDashboard() {
             <DropdownMenuTrigger asChild>
               <button className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
                 <Avatar className="w-11 h-11 border-2 border-gray-100">
-                  <AvatarImage src="/placeholder.svg?height=44&width=44" />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-600 to-blue-800 text-white">
-                    БН
-                  </AvatarFallback>
+                  {user?.profileImage ? (
+                    <AvatarImage src={user.profileImage} />
+                  ) : (
+                    <AvatarFallback className="bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+                      {user?.email?.charAt(0).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
                 <div className="flex-1 min-w-0 text-left">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    Батбаяр Нарантуяа
-                  </p>
+                  <div className="flex gap-1">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {user?.lastName || "User"}{" "}
+                    </p>
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {user?.firstName || "User"}{" "}
+                    </p>
+                  </div>
                   <p className="text-xs text-gray-500 truncate">
-                    batbayar@gmail.com
+                    {user?.email || "user@example.com"}
                   </p>
                 </div>
                 <ChevronDown className="w-4 h-4 text-gray-400" />

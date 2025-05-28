@@ -4,7 +4,8 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 interface User {
   _id: string;
-  username: string;
+  lastName: string;
+  firstName: string;
   email: string;
   profileImage?: string;
   createdAt: string;
@@ -70,4 +71,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   return useContext(AuthContext);
-} 
+}

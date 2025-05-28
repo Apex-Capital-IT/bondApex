@@ -78,9 +78,6 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error("Forgot password error:", error);
-    return NextResponse.json(
-      { error: "Алдаа гарлаа" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Алдаа гарлаа" }, { status: 500 });
   }
-} 
+}

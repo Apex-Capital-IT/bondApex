@@ -129,7 +129,7 @@ export default function Navigation() {
                 Contact us
               </Link>
               <Link
-                href="coming-soon"
+                href="/company"
                 className="px-4 py-2 rounded-full bg-gradient-to-r backdrop-blur-xl border border-black/30 text-black/70 transition-all shadow-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -239,7 +239,7 @@ export default function Navigation() {
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <Link
-              href="coming-soon"
+              href="/company"
               className={`font-bold transition-colors ${
                 isScrolled ? "text-black" : "text-black"
               }`}

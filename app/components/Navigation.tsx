@@ -243,7 +243,7 @@ export default function Navigation() {
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <Link
-              href="/welcome"
+              href="/company"
               className={`font-bold transition-colors ${
                 isScrolled ? "text-black" : "text-white"
               }`}

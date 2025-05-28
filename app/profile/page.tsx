@@ -284,7 +284,8 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
   }, [success]);
 
   const [formData, setFormData] = useState({
-    name: "",
+    lastName: "",
+    firstName: "",
     email: "",
     currentPassword: "",
     newPassword: "",
@@ -298,7 +299,8 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
     if (user) {
       setFormData((prev) => ({
         ...prev,
-        name: user.username || "",
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
         email: user.email || "",
       }));
       if (user.profileImage) {
@@ -371,8 +373,12 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) {
+    if (!formData.firstName.trim()) {
       setError("Нэрээ оруулна уу");
+      return false;
+    }
+    if (!formData.lastName.trim()) {
+      setError("Овогоо оруулна уу");
       return false;
     }
     if (!formData.email.trim()) {
@@ -405,7 +411,8 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("name", formData.name);
+      formDataToSend.append("firstName", formData.firstName);
+      formDataToSend.append("lastName", formData.lastName);
       formDataToSend.append("email", formData.email);
       formDataToSend.append("userId", user._id);
 
@@ -714,13 +721,30 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
             <div className="space-y-4 sm:space-y-6">
               <div className="p-3 sm:p-4 bg-white rounded-lg border border-gray-200">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Овог
+                </label>
+                <input
+                  type="text"
+                  value={formData.lastName}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, lastName: e.target.value }))
+                  }
+                  disabled={!isEditing}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg transition-colors duration-200 ${
+                    !isEditing ? "bg-gray-50 cursor-not-allowed" : ""
+                  }`}
+                  placeholder="Овогоо оруулна уу"
+                />
+              </div>
+              <div className="p-3 sm:p-4 bg-white rounded-lg border border-gray-200">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Нэр
                 </label>
                 <input
                   type="text"
-                  value={formData.name}
+                  value={formData.firstName}
                   onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                    setFormData((prev) => ({ ...prev, firstName: e.target.value }))
                   }
                   disabled={!isEditing}
                   className={`w-full px-3 py-2 border border-gray-300 rounded-lg transition-colors duration-200 ${
@@ -729,7 +753,6 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
                   placeholder="Нэрээ оруулна уу"
                 />
               </div>
-
               {/* Email Section */}
               <div className="p-3 sm:p-4 bg-white rounded-lg border border-gray-200">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -814,7 +837,9 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
                         />
                         <button
                           type="button"
-                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          onClick={() =>
+                            setShowCurrentPassword(!showCurrentPassword)
+                          }
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                         >
                           {showCurrentPassword ? (
@@ -876,7 +901,9 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
                         />
                         <button
                           type="button"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                         >
                           {showConfirmPassword ? (
@@ -950,7 +977,9 @@ function ProfileContent({ isEditing }: { isEditing: boolean }) {
         title="Нууц үг солих"
         message={
           <div className="space-y-4">
-            <p className="text-sm text-gray-600">Та нууц үгээ солихдоо итгэлтэй байна уу?</p>
+            <p className="text-sm text-gray-600">
+              Та нууц үгээ солихдоо итгэлтэй байна уу?
+            </p>
             {showPasswordSuccess && (
               <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg flex items-center gap-2">
                 <Check className="h-5 w-5" />

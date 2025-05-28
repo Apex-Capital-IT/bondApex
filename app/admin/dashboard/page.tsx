@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BondRequest } from "@/app/models/BondRequest";
+import { SaleRequest } from "@/app/models/SaleRequest";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { Check, X, Clock, AlertCircle } from "lucide-react";
@@ -10,18 +11,34 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function AdminDashboard() {
-  const [requests, setRequests] = useState<BondRequest[]>([]);
-  const [selectedRequest, setSelectedRequest] = useState<BondRequest | null>(
-    null
-  );
+  const [buyRequests, setBuyRequests] = useState<BondRequest[]>([]);
+  const [sellRequests, setSellRequests] = useState<SaleRequest[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<BondRequest | SaleRequest | null>(null);
   const [declineReason, setDeclineReason] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [expandedRequestId, setExpandedRequestId] = useState<string | null>(
-    null
-  );
+  const [expandedRequestId, setExpandedRequestId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [activeTab, setActiveTab] = useState<'buy' | 'sell'>('buy');
+  const [balance, setBalance] = useState(4000000000); // Initial balance
   const router = useRouter();
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const calculateBalance = () => {
+    const acceptedBuyRequests = buyRequests.filter(
+      (request) => request.status === "accepted"
+    );
+    const totalSpent = acceptedBuyRequests.reduce((sum, request) => {
+      const price = typeof request.price === 'string' 
+        ? parseInt(request.price.replace(/[^0-9.-]+/g, "")) 
+        : 0;
+      return sum + price;
+    }, 0);
+    return 4000000000 - totalSpent;
+  };
+
+  useEffect(() => {
+    setBalance(calculateBalance());
+  }, [buyRequests]);
 
   useEffect(() => {
     // Check if there's a saved code in localStorage
@@ -47,10 +64,19 @@ export default function AdminDashboard() {
 
     const fetchRequests = async () => {
       try {
-        const response = await fetch("/api/bond/requests");
-        if (response.ok) {
-          const data = await response.json();
-          setRequests(data);
+        const [buyResponse, sellResponse] = await Promise.all([
+          fetch("/api/admin/buyRequests"),
+          fetch("/api/admin/sellRequests")
+        ]);
+        
+        if (buyResponse.ok) {
+          const buyData = await buyResponse.json();
+          setBuyRequests(buyData);
+        }
+        
+        if (sellResponse.ok) {
+          const sellData = await sellResponse.json();
+          setSellRequests(sellData);
         }
       } catch (error) {
         console.error("Error fetching requests:", error);
@@ -63,12 +89,16 @@ export default function AdminDashboard() {
   }, [router]);
 
   const handleStatusChange = async (
-    request: BondRequest,
-    newStatus: "pending" | "accepted" | "declined"
+    request: BondRequest | SaleRequest,
+    newStatus: "pending" | "accepted" | "declined" | "normal"
   ) => {
     try {
       setIsUpdating(true);
-      const response = await fetch(`/api/bond/request/${request.id}`, {
+      const endpoint = 'bondRequestId' in request ? 
+        `/api/admin/buyRequests/${request.id}` : 
+        `/api/admin/sellRequests/${request.id}`;
+
+      const response = await fetch(endpoint, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -80,18 +110,33 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        setRequests(
-          requests.map((r) =>
-            r.id === request.id
-              ? {
-                  ...r,
-                  status: newStatus,
-                  declineReason:
-                    newStatus === "declined" ? declineReason : undefined,
-                }
-              : r
-          )
-        );
+        if ('bondRequestId' in request) {
+          setBuyRequests(
+            buyRequests.map((r) =>
+              r.id === request.id
+                ? {
+                    ...r,
+                    status: newStatus as "pending" | "accepted" | "declined",
+                    declineReason:
+                      newStatus === "declined" ? declineReason : undefined,
+                  }
+                : r
+            )
+          );
+        } else {
+          setSellRequests(
+            sellRequests.map((r) =>
+              r.id === request.id
+                ? {
+                    ...r,
+                    status: newStatus as "pending" | "accepted" | "normal",
+                    declineReason:
+                      newStatus === "declined" ? declineReason : undefined,
+                  }
+                : r
+            )
+          );
+        }
         setSelectedRequest(null);
         setDeclineReason("");
         toast.success("Хүсэлт амжилттай шинэчлэгдлээ");
@@ -103,7 +148,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDragStart = (e: React.DragEvent, request: BondRequest) => {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, request: BondRequest | SaleRequest) => {
     setIsDragging(true);
     e.dataTransfer.setData("requestId", request.id);
   };
@@ -118,12 +163,13 @@ export default function AdminDashboard() {
 
   const handleDrop = async (
     e: React.DragEvent,
-    newStatus: "pending" | "accepted" | "declined"
+    newStatus: "pending" | "accepted" | "declined" | "normal"
   ) => {
     e.preventDefault();
     if (isUpdating) return; // prevent multiple drops
 
     const requestId = e.dataTransfer.getData("requestId");
+    const requests = activeTab === 'buy' ? buyRequests : sellRequests;
     const request = requests.find((r) => r.id === requestId);
 
     if (request && request.status !== newStatus) {
@@ -165,7 +211,17 @@ export default function AdminDashboard() {
     }
   };
 
+  const getUserRequestCount = (email: string) => {
+    const requests = activeTab === 'buy' ? buyRequests : sellRequests;
+    return requests.filter((request) => request.userEmail === email).length;
+  };
+
+  const getRequestBackgroundColor = (email: string) => {
+    return getUserRequestCount(email) >= 2 ? "bg-gray-500" : "bg-white";
+  };
+
   const getRequestsByStatus = (status: string) => {
+    const requests = activeTab === 'buy' ? buyRequests : sellRequests;
     return requests.filter((request) => request.status === status);
   };
 
@@ -182,6 +238,43 @@ export default function AdminDashboard() {
     setExpandedRequestId(expandedRequestId === requestId ? null : requestId);
   };
 
+  const renderRequestDetails = (request: BondRequest | SaleRequest) => {
+    if ('bondRequestId' in request) {
+      // Sale Request
+      return (
+        <>
+          <div className="text-sm text-gray-500">Бонд ID</div>
+          <div className="font-medium">{request.bondId}</div>
+          <div className="text-sm text-gray-500 mt-2">Хэрэглэгч</div>
+          <div className="font-medium">{request.userEmail}</div>
+          <div className="text-sm text-gray-500 mt-2">Үнэ</div>
+          <div className="font-medium">
+            <div>Анхны үнэ: {request.price.originalPrice}₮</div>
+            <div>Зарах үнэ: {request.price.sellPrice}₮</div>
+            <div>Хүү: {request.price.interestAmount}₮</div>
+            <div>Хугацаа: {request.price.daysHeld} хоног</div>
+          </div>
+        </>
+      );
+    } else {
+      // Buy Request
+      return (
+        <>
+          <div className="text-sm text-gray-500">Бонд</div>
+          <div className="font-medium">{request.bondTitle}</div>
+          <div className="text-sm text-gray-500 mt-2">Хэрэглэгч</div>
+          <div className="font-medium">{request.name}</div>
+          <div className="text-sm text-gray-500 mt-2">Регистр</div>
+          <div className="font-medium">{request.registration}</div>
+          <div className="text-sm text-gray-500 mt-2">Утас</div>
+          <div className="font-medium">{request.phone}</div>
+          <div className="text-sm text-gray-500 mt-2">Үнэ</div>
+          <div className="font-medium">{request.price}₮</div>
+        </>
+      );
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -193,7 +286,39 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Bond Requests</h1>
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-3xl font-bold text-gray-900">Bond Requests</h1>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setActiveTab('buy')}
+                className={`px-4 py-2 rounded-md ${
+                  activeTab === 'buy'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700'
+                }`}
+              >
+                Buy Requests
+              </button>
+              <button
+                onClick={() => setActiveTab('sell')}
+                className={`px-4 py-2 rounded-md ${
+                  activeTab === 'sell'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700'
+                }`}
+              >
+                Sell Requests
+              </button>
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <div className="text-sm text-gray-500">Үлдэгдэл</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {balance.toLocaleString()}₮
+            </div>
+          </div>
+        </div>
         {isUpdating && (
           <div className="fixed inset-0 bg-white/50 z-50 flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
@@ -207,7 +332,7 @@ export default function AdminDashboard() {
               className="bg-white rounded-lg shadow-sm p-4"
               onDragOver={handleDragOver}
               onDrop={(e) =>
-                handleDrop(e, status as "pending" | "accepted" | "declined")
+                handleDrop(e, status as "pending" | "accepted" | "declined" | "normal")
               }
             >
               <div
@@ -228,135 +353,20 @@ export default function AdminDashboard() {
                 {getRequestsByStatus(status).map((request) => (
                   <motion.div
                     key={request.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, request)}
-                    onDragEnd={handleDragEnd}
-                    onClick={(e) => toggleRequestDetails(request.id, e)}
-                    className="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium text-gray-900">
-                          {request.bondTitle}
-                        </h3>
-                        <p className="text-sm text-gray-500">
-                          {request.userEmail}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {format(new Date(request.timestamp), "PPP p")}
-                        </p>
-                      </div>
-                      <div className="text-gray-400">
-                        {expandedRequestId === request.id ? "▲" : "▼"}
-                      </div>
+                    <div
+                      draggable
+                      onDragStart={(e: React.DragEvent<HTMLDivElement>) => handleDragStart(e, request)}
+                      onDragEnd={handleDragEnd}
+                      onClick={(e) => toggleRequestDetails(request.id, e)}
+                      className={`p-4 rounded-lg shadow-sm cursor-pointer transition-colors ${
+                        getRequestBackgroundColor(request.userEmail)
+                      }`}
+                    >
+                      {renderRequestDetails(request)}
                     </div>
-
-                    {/* Expanded View with Form Details */}
-                    {expandedRequestId === request.id && (
-                      <motion.div
-                        className="mt-4 p-3 bg-gray-50 rounded-md border border-gray-200"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <h4 className="font-medium text-gray-700 mb-2">
-                          Form Details
-                        </h4>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          {/* Submitted Form Details */}
-                          {request.name && (
-                            <div className="flex flex-col gap-2">
-                              <p className="text-gray-500">Name:</p>
-                              <p className="font-medium">{request.name}</p>
-
-                              <p className="text-gray-500">Registration:</p>
-                              <p className="font-medium">
-                                {request.registration || "N/A"}
-                              </p>
-
-                              <p className="text-gray-500">Email:</p>
-                              <p className="font-medium">{request.userEmail}</p>
-
-                              <p className="text-gray-500">Phone:</p>
-                              <p className="font-medium">
-                                {request.phone || "N/A"}
-                              </p>
-
-                              <p className="text-gray-500">Price:</p>
-                              <p className="font-medium">
-                                {request.price || "N/A"}
-                              </p>
-                            </div>
-                          )}
-
-                          <div className="col-span-2 mt-2">
-                            <h4 className="font-medium text-gray-700 mb-1">
-                              Bond Details
-                            </h4>
-                            <p className="text-gray-500">
-                              Bond ID:{" "}
-                              <span className="font-medium">
-                                {request.bondId}
-                              </span>
-                            </p>
-
-                            {request.nominalPrice && (
-                              <p className="text-gray-500">
-                                Nominal Price:{" "}
-                                <span className="font-medium">
-                                  {request.nominalPrice}
-                                </span>
-                              </p>
-                            )}
-
-                            {request.unitPrice && (
-                              <p className="text-gray-500">
-                                Unit Price:{" "}
-                                <span className="font-medium">
-                                  {request.unitPrice}
-                                </span>
-                              </p>
-                            )}
-
-                            {request.features &&
-                              request.features.length > 0 && (
-                                <div className="mt-1">
-                                  <p className="text-gray-500">Features:</p>
-                                  <ul className="list-disc list-inside ml-2">
-                                    {request.features.map((feature, index) => (
-                                      <li key={index} className="text-xs">
-                                        {feature}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-
-                    {selectedRequest?.id === request.id && (
-                      <div className="mt-4">
-                        <input
-                          type="text"
-                          value={declineReason}
-                          onChange={(e) => setDeclineReason(e.target.value)}
-                          placeholder="Enter decline reason"
-                          className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        />
-                        <button
-                          onClick={() =>
-                            handleStatusChange(request, "declined")
-                          }
-                          className="mt-2 w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                        >
-                          Confirm Decline
-                        </button>
-                      </div>
-                    )}
                   </motion.div>
                 ))}
               </div>
@@ -368,3 +378,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+

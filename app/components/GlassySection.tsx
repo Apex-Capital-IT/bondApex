@@ -35,8 +35,8 @@ export default function GlassySection({ ref }: GlassySectionProps) {
 
   const bondDetails: BondDetailsMap = {
     1: {
-      title: "Бонд-1",
-      description: "Сар тутам хүү төлөлттэй, 12 сарын хугацаатай хаалттай бонд",
+      title: "Домог Импекс",
+      description: "Улирал тутам хүү төлөлттэй, 12 сарын хугацаатай хаалттай бонд",
       features: [
         "Өндөр хүүтэй",
         "Тогтвортой орлого",
@@ -44,19 +44,8 @@ export default function GlassySection({ ref }: GlassySectionProps) {
       ],
     },
     2: {
-      title: "Бонд-2",
-      description:
-        "Улирал тутам хүү төлөлттэй, 12 сарын хугацаатай хаалттай бонд",
-      features: [
-        "Өндөр хүүтэй",
-        "Тогтвортой орлого",
-        "Хаалттай хөрөнгө оруулалт",
-      ],
-    },
-    3: {
-      title: "Бонд-3",
-      description:
-        "Хагас жил тутам хүү төлөлттэй, 18 сарын хугацаатай хаалттай бонд",
+      title: "ЦБОН",
+      description: "Улирал тутам хүү төлөлттэй, 18 сарын хугацаатай хаалттай бонд",
       features: [
         "Өндөр хүүтэй",
         "Тогтвортой орлого",
@@ -103,8 +92,8 @@ export default function GlassySection({ ref }: GlassySectionProps) {
 
           {/* Cards Section */}
           <div className="w-full font-['Cormorant_Garamond'] max-w-4xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Card 1 - Bond 1 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Card 1 - Домог Импекс */}
               <Link href="/bond/1">
                 <motion.div
                   className="p-6 rounded-2xl bg-white/10 backdrop-blur-2xl border border-white/30 shadow-xl cursor-none"
@@ -140,7 +129,7 @@ export default function GlassySection({ ref }: GlassySectionProps) {
                     </div>
                   </div>
                   <h3 className="text-xl font-bold text-black/70 mb-4">
-                    Бонд-1
+                    Домог Импекс
                   </h3>
                   <div className="space-y-2 font-semibold text-black/80">
                     <p className="flex justify-between">
@@ -149,11 +138,11 @@ export default function GlassySection({ ref }: GlassySectionProps) {
                     </p>
                     <p className="flex justify-between">
                       <span>Хүү:</span>
-                      <span className="font-medium">19%</span>
+                      <span className="font-medium">19.0%</span>
                     </p>
                     <p className="flex justify-between">
                       <span>Хүү төлөлт:</span>
-                      <span className="font-medium">Сар тутам</span>
+                      <span className="font-medium">Улирал тутам</span>
                     </p>
                     <p className="flex justify-between">
                       <span>Хугацаа:</span>
@@ -171,7 +160,7 @@ export default function GlassySection({ ref }: GlassySectionProps) {
                 </motion.div>
               </Link>
 
-              {/* Card 2 - Bond 2 */}
+              {/* Card 2 - ЦБОН */}
               <Link href="/bond/2">
                 <motion.div
                   className="p-6 rounded-2xl bg-white/10 backdrop-blur-2xl border border-white/30 shadow-xl cursor-none"
@@ -207,7 +196,7 @@ export default function GlassySection({ ref }: GlassySectionProps) {
                     </div>
                   </div>
                   <h3 className="text-xl font-bold text-black/70 mb-4">
-                    Бонд-2
+                    ЦБОН
                   </h3>
                   <div className="space-y-2 font-semibold text-black/80">
                     <p className="flex justify-between">
@@ -216,78 +205,11 @@ export default function GlassySection({ ref }: GlassySectionProps) {
                     </p>
                     <p className="flex justify-between">
                       <span>Хүү:</span>
-                      <span className="font-medium">19.5%</span>
+                      <span className="font-medium">20.5%</span>
                     </p>
                     <p className="flex justify-between">
                       <span>Хүү төлөлт:</span>
                       <span className="font-medium">Улирал тутам</span>
-                    </p>
-                    <p className="flex justify-between">
-                      <span>Хугацаа:</span>
-                      <span className="font-medium">12 сар</span>
-                    </p>
-                    <p className="flex justify-between">
-                      <span>Нэрлэсэн үнэ:</span>
-                      <span className="font-medium">₮1,000,000</span>
-                    </p>
-                    <p className="flex justify-between">
-                      <span>Доод хэмжээ:</span>
-                      <span className="font-medium">₮5,000,000</span>
-                    </p>
-                  </div>
-                </motion.div>
-              </Link>
-
-              {/* Card 3 - Bond 3 */}
-              <Link href="/bond/3">
-                <motion.div
-                  className="p-6 rounded-2xl bg-white/10 backdrop-blur-2xl border border-white/30 shadow-xl cursor-none"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.2 }}
-                  onMouseEnter={() => setHoveredBond(3)}
-                  onMouseLeave={() => setHoveredBond(null)}
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl flex items-center justify-center shadow-lg">
-                      <svg
-                        className="w-6 h-6 text-black/70"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                      >
-                        <text
-                          x="50%"
-                          y="50%"
-                          dominantBaseline="middle"
-                          textAnchor="middle"
-                          fontSize="20"
-                          fontWeight="bold"
-                        >
-                          ₮
-                        </text>
-                      </svg>
-                    </div>
-                    <div className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/20 to-yellow-500/20 backdrop-blur-xl shadow-lg md:hidden">
-                      <span className="text-black/80 font-medium">
-                        Танилцах ?
-                      </span>
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold text-black/70 mb-4">
-                    Бонд-3
-                  </h3>
-                  <div className="space-y-2 font-semibold text-black/80">
-                    <p className="flex justify-between">
-                      <span>Төрөл:</span>
-                      <span className="font-medium">Хаалттай</span>
-                    </p>
-                    <p className="flex justify-between">
-                      <span>Хүү:</span>
-                      <span className="font-medium">19%</span>
-                    </p>
-                    <p className="flex justify-between">
-                      <span>Хүү төлөлт:</span>
-                      <span className="font-medium">Хагас жил тутам</span>
                     </p>
                     <p className="flex justify-between">
                       <span>Хугацаа:</span>
