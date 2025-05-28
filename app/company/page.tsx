@@ -432,7 +432,7 @@ export default function AdminDashboard() {
 
     const handleSaleRequest = async (bondId: string, originalPrice: string) => {
       try {
-        const response = await fetch("/api/bond/sale-request", {
+        const response = await fetch("/api/users/sale-request", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

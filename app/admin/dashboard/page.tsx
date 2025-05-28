@@ -13,12 +13,16 @@ import "react-toastify/dist/ReactToastify.css";
 export default function AdminDashboard() {
   const [buyRequests, setBuyRequests] = useState<BondRequest[]>([]);
   const [sellRequests, setSellRequests] = useState<SaleRequest[]>([]);
-  const [selectedRequest, setSelectedRequest] = useState<BondRequest | SaleRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<
+    BondRequest | SaleRequest | null
+  >(null);
   const [declineReason, setDeclineReason] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [expandedRequestId, setExpandedRequestId] = useState<string | null>(null);
+  const [expandedRequestId, setExpandedRequestId] = useState<string | null>(
+    null
+  );
   const [isDragging, setIsDragging] = useState(false);
-  const [activeTab, setActiveTab] = useState<'buy' | 'sell'>('buy');
+  const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
   const [balance, setBalance] = useState(4000000000); // Initial balance
   const router = useRouter();
   const [isUpdating, setIsUpdating] = useState(false);
@@ -27,18 +31,34 @@ export default function AdminDashboard() {
     const acceptedBuyRequests = buyRequests.filter(
       (request) => request.status === "accepted"
     );
+    const acceptedSellRequests = sellRequests.filter(
+      (request) => request.status === "accepted"
+    );
+
+    // Calculate total spent on buy requests
     const totalSpent = acceptedBuyRequests.reduce((sum, request) => {
-      const price = typeof request.price === 'string' 
-        ? parseInt(request.price.replace(/[^0-9.-]+/g, "")) 
-        : 0;
+      const price =
+        typeof request.price === "string"
+          ? parseInt(request.price.replace(/[^0-9.-]+/g, ""))
+          : 0;
       return sum + price;
     }, 0);
-    return 4000000000 - totalSpent;
+
+    // Calculate total earned from sell requests
+    const totalEarned = acceptedSellRequests.reduce((sum, request) => {
+      const sellPrice =
+        typeof request.price.sellPrice === "string"
+          ? parseInt(request.price.sellPrice.replace(/[^0-9.-]+/g, ""))
+          : request.price.sellPrice || 0;
+      return sum + sellPrice;
+    }, 0);
+
+    return 4000000000 - totalSpent + totalEarned;
   };
 
   useEffect(() => {
     setBalance(calculateBalance());
-  }, [buyRequests]);
+  }, [buyRequests, sellRequests]);
 
   useEffect(() => {
     // Check if there's a saved code in localStorage
@@ -66,14 +86,14 @@ export default function AdminDashboard() {
       try {
         const [buyResponse, sellResponse] = await Promise.all([
           fetch("/api/admin/buyRequests"),
-          fetch("/api/admin/sellRequests")
+          fetch("/api/admin/sellRequests"),
         ]);
-        
+
         if (buyResponse.ok) {
           const buyData = await buyResponse.json();
           setBuyRequests(buyData);
         }
-        
+
         if (sellResponse.ok) {
           const sellData = await sellResponse.json();
           setSellRequests(sellData);
@@ -94,9 +114,19 @@ export default function AdminDashboard() {
   ) => {
     try {
       setIsUpdating(true);
-      const endpoint = 'bondRequestId' in request ? 
-        `/api/admin/buyRequests/${request.id}` : 
-        `/api/admin/sellRequests/${request.id}`;
+      // Check if it's a buy request by looking for buy request specific fields
+      const isBuyRequest = "name" in request && "registration" in request;
+      const endpoint = isBuyRequest
+        ? `/api/admin/buyRequests/${request.id}`
+        : `/api/admin/sellRequests/${request.id}`;
+
+      console.log("Updating request:", {
+        requestId: request.id,
+        endpoint,
+        status: newStatus,
+        isBuyRequest,
+        requestType: isBuyRequest ? "buy" : "sell",
+      });
 
       const response = await fetch(endpoint, {
         method: "PATCH",
@@ -109,46 +139,58 @@ export default function AdminDashboard() {
         }),
       });
 
-      if (response.ok) {
-        if ('bondRequestId' in request) {
-          setBuyRequests(
-            buyRequests.map((r) =>
-              r.id === request.id
-                ? {
-                    ...r,
-                    status: newStatus as "pending" | "accepted" | "declined",
-                    declineReason:
-                      newStatus === "declined" ? declineReason : undefined,
-                  }
-                : r
-            )
-          );
-        } else {
-          setSellRequests(
-            sellRequests.map((r) =>
-              r.id === request.id
-                ? {
-                    ...r,
-                    status: newStatus as "pending" | "accepted" | "normal",
-                    declineReason:
-                      newStatus === "declined" ? declineReason : undefined,
-                  }
-                : r
-            )
-          );
-        }
-        setSelectedRequest(null);
-        setDeclineReason("");
-        toast.success("Хүсэлт амжилттай шинэчлэгдлээ");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.error("Error response:", {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+        });
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      if (isBuyRequest) {
+        setBuyRequests(
+          buyRequests.map((r) =>
+            r.id === request.id
+              ? {
+                  ...r,
+                  status: newStatus as "pending" | "accepted" | "declined",
+                  declineReason:
+                    newStatus === "declined" ? declineReason : undefined,
+                }
+              : r
+          )
+        );
+      } else {
+        setSellRequests(
+          sellRequests.map((r) =>
+            r.id === request.id
+              ? {
+                  ...r,
+                  status: newStatus as "pending" | "accepted" | "normal",
+                  declineReason:
+                    newStatus === "declined" ? declineReason : undefined,
+                }
+              : r
+          )
+        );
+      }
+      setSelectedRequest(null);
+      setDeclineReason("");
+      toast.success("Хүсэлт амжилттай шинэчлэгдлээ");
     } catch (error) {
       console.error("Error updating request status:", error);
+      toast.error("Хүсэлт шинэчлэхэд алдаа гарлаа");
     } finally {
       setIsUpdating(false);
     }
   };
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, request: BondRequest | SaleRequest) => {
+  const handleDragStart = (
+    e: React.DragEvent<HTMLDivElement>,
+    request: BondRequest | SaleRequest
+  ) => {
     setIsDragging(true);
     e.dataTransfer.setData("requestId", request.id);
   };
@@ -169,7 +211,7 @@ export default function AdminDashboard() {
     if (isUpdating) return; // prevent multiple drops
 
     const requestId = e.dataTransfer.getData("requestId");
-    const requests = activeTab === 'buy' ? buyRequests : sellRequests;
+    const requests = activeTab === "buy" ? buyRequests : sellRequests;
     const request = requests.find((r) => r.id === requestId);
 
     if (request && request.status !== newStatus) {
@@ -212,16 +254,16 @@ export default function AdminDashboard() {
   };
 
   const getUserRequestCount = (email: string) => {
-    const requests = activeTab === 'buy' ? buyRequests : sellRequests;
+    const requests = activeTab === "buy" ? buyRequests : sellRequests;
     return requests.filter((request) => request.userEmail === email).length;
   };
 
   const getRequestBackgroundColor = (email: string) => {
-    return getUserRequestCount(email) >= 2 ? "bg-gray-500" : "bg-white";
+    return getUserRequestCount(email) >= 2 ? "bg-gray-100" : "bg-white";
   };
 
   const getRequestsByStatus = (status: string) => {
-    const requests = activeTab === 'buy' ? buyRequests : sellRequests;
+    const requests = activeTab === "buy" ? buyRequests : sellRequests;
     return requests.filter((request) => request.status === status);
   };
 
@@ -239,7 +281,7 @@ export default function AdminDashboard() {
   };
 
   const renderRequestDetails = (request: BondRequest | SaleRequest) => {
-    if ('bondRequestId' in request) {
+    if ("bondRequestId" in request) {
       // Sale Request
       return (
         <>
@@ -291,21 +333,21 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold text-gray-900">Bond Requests</h1>
             <div className="flex space-x-2">
               <button
-                onClick={() => setActiveTab('buy')}
+                onClick={() => setActiveTab("buy")}
                 className={`px-4 py-2 rounded-md ${
-                  activeTab === 'buy'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700'
+                  activeTab === "buy"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-700"
                 }`}
               >
                 Buy Requests
               </button>
               <button
-                onClick={() => setActiveTab('sell')}
+                onClick={() => setActiveTab("sell")}
                 className={`px-4 py-2 rounded-md ${
-                  activeTab === 'sell'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700'
+                  activeTab === "sell"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-700"
                 }`}
               >
                 Sell Requests
@@ -326,13 +368,19 @@ export default function AdminDashboard() {
         )}
 
         <div className="grid grid-cols-3 gap-6">
-          {["pending", "accepted", "declined"].map((status) => (
+          {(activeTab === "buy"
+            ? ["pending", "accepted", "declined"]
+            : ["pending", "accepted", "normal"]
+          ).map((status) => (
             <div
               key={status}
               className="bg-white rounded-lg shadow-sm p-4"
               onDragOver={handleDragOver}
               onDrop={(e) =>
-                handleDrop(e, status as "pending" | "accepted" | "declined" | "normal")
+                handleDrop(
+                  e,
+                  status as "pending" | "accepted" | "declined" | "normal"
+                )
               }
             >
               <div
@@ -358,12 +406,14 @@ export default function AdminDashboard() {
                   >
                     <div
                       draggable
-                      onDragStart={(e: React.DragEvent<HTMLDivElement>) => handleDragStart(e, request)}
+                      onDragStart={(e: React.DragEvent<HTMLDivElement>) =>
+                        handleDragStart(e, request)
+                      }
                       onDragEnd={handleDragEnd}
                       onClick={(e) => toggleRequestDetails(request.id, e)}
-                      className={`p-4 rounded-lg shadow-sm cursor-pointer transition-colors ${
-                        getRequestBackgroundColor(request.userEmail)
-                      }`}
+                      className={`p-4 rounded-lg shadow-sm cursor-pointer transition-colors ${getRequestBackgroundColor(
+                        request.userEmail
+                      )}`}
                     >
                       {renderRequestDetails(request)}
                     </div>
@@ -378,5 +428,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
-

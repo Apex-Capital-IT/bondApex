@@ -42,12 +42,6 @@ export const metadata: Metadata = {
       },
     ],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "Apex Capital",
-    description: "Apex Capital - Your Investment Partner",
-    images: ["/BOND-1x1.png"],
-  },
 };
 
 export default function RootLayout({

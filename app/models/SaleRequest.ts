@@ -19,12 +19,11 @@ export interface SaleRequest {
   declineReason?: string;
 }
 
-function calculateSellPrice(originalPrice: string, purchaseDate: string): {
+function calculateSellPrice(originalPrice: string, purchaseDate: string, annualInterestRate: number): {
   sellPrice: string;
   interestAmount: string;
   daysHeld: number;
 } {
-  const ANNUAL_INTEREST_RATE = 0.19; // 19% annual interest rate
   const price = parseFloat(originalPrice.replace(/[^0-9.-]+/g, ""));
   const purchase = new Date(purchaseDate);
   const now = new Date();
@@ -33,7 +32,7 @@ function calculateSellPrice(originalPrice: string, purchaseDate: string): {
   const daysHeld = Math.floor((now.getTime() - purchase.getTime()) / (1000 * 60 * 60 * 24));
   
   // Calculate daily interest rate
-  const dailyRate = ANNUAL_INTEREST_RATE / 365;
+  const dailyRate = annualInterestRate / 365;
   
   // Calculate interest amount
   const interestAmount = price * dailyRate * daysHeld;
@@ -53,16 +52,18 @@ export async function createSaleRequest(
   bondId: string,
   userEmail: string,
   originalPrice: string,
-  purchaseDate: string
+  purchaseDate: string,
+  annualInterestRate: number
 ): Promise<SaleRequest | null> {
   try {
     const client = await clientPromise;
     const db = client.db();
     
-    // Check if a sale request already exists for this bond request
+    // Check if a sale request already exists for this bond request with a non-normal status
     const existingSaleRequest = await db.collection<SaleRequest>('saleRequests').findOne({
       bondRequestId,
-      userEmail
+      userEmail,
+      status: { $ne: 'normal' }
     });
 
     if (existingSaleRequest) {
@@ -70,7 +71,7 @@ export async function createSaleRequest(
     }
     
     // Calculate sell price
-    const { sellPrice, interestAmount, daysHeld } = calculateSellPrice(originalPrice, purchaseDate);
+    const { sellPrice, interestAmount, daysHeld } = calculateSellPrice(originalPrice, purchaseDate, annualInterestRate);
     
     // Generate a unique ID for the sale request
     const id = crypto.randomUUID();
@@ -85,7 +86,7 @@ export async function createSaleRequest(
       price: {
         originalPrice,
         sellPrice,
-        interestRate: 19,
+        interestRate: annualInterestRate * 100, // Convert to percentage for display
         daysHeld,
         interestAmount
       }
@@ -156,21 +157,32 @@ export async function updateSaleRequest(
   update: Partial<SaleRequest>
 ): Promise<SaleRequest | null> {
   try {
+    console.log('Updating sale request:', {
+      id,
+      update
+    });
+
     const client = await clientPromise;
     const db = client.db();
     
     // Update the sale request
-    await db.collection<SaleRequest>('saleRequests').updateOne(
+    const updateResult = await db.collection<SaleRequest>('saleRequests').updateOne(
       { id },
       { $set: update }
     );
+
+    console.log('MongoDB update result:', {
+      matchedCount: updateResult.matchedCount,
+      modifiedCount: updateResult.modifiedCount,
+      upsertedCount: updateResult.upsertedCount
+    });
 
     // Get the updated sale request
     const updatedSaleRequest = await db.collection<SaleRequest>('saleRequests').findOne({ id });
     
     if (updatedSaleRequest) {
       // Update the corresponding bond request's saleRequest status
-      await db.collection('bondRequests').updateOne(
+      const bondUpdateResult = await db.collection('bondRequests').updateOne(
         { id: updatedSaleRequest.bondRequestId },
         { 
           $set: { 
@@ -181,6 +193,11 @@ export async function updateSaleRequest(
           } 
         }
       );
+
+      console.log('Bond request update result:', {
+        matchedCount: bondUpdateResult.matchedCount,
+        modifiedCount: bondUpdateResult.modifiedCount
+      });
     }
 
     return updatedSaleRequest;
