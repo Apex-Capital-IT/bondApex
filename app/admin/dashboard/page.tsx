@@ -2,19 +2,69 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BondRequest } from "@/app/models/BondRequest";
-import { SaleRequest } from "@/app/models/SaleRequest";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { Check, X, Clock, AlertCircle } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+interface CompanyRequest {
+  _id: string;
+  email: string;
+  dugaar: string;
+  status: "pending" | "accepted" | "declined";
+  createdAt: string;
+}
+
+interface BondRequest {
+  id: string;
+  userEmail: string;
+  name: string;
+  registration: string;
+  phone: string;
+  price: string;
+  bondTitle: string;
+  status: "pending" | "accepted" | "declined";
+  declineReason?: string;
+}
+
+interface SaleRequest {
+  id: string;
+  userEmail: string;
+  bondId: string;
+  bondRequestId: string;
+  price: {
+    originalPrice: string;
+    sellPrice: string;
+    interestAmount: string;
+    daysHeld: number;
+  };
+  status: "pending" | "accepted" | "normal";
+  declineReason?: string;
+}
+
+type RequestType = BondRequest | SaleRequest | CompanyRequest;
+
+const isBondRequest = (request: RequestType): request is BondRequest => {
+  return "id" in request && "userEmail" in request && !("dugaar" in request);
+};
+
+const isSaleRequest = (request: RequestType): request is SaleRequest => {
+  return (
+    "id" in request && "userEmail" in request && "bondRequestId" in request
+  );
+};
+
+const isCompanyRequest = (request: RequestType): request is CompanyRequest => {
+  return "_id" in request && "dugaar" in request;
+};
+
 export default function AdminDashboard() {
   const [buyRequests, setBuyRequests] = useState<BondRequest[]>([]);
   const [sellRequests, setSellRequests] = useState<SaleRequest[]>([]);
+  const [companyRequests, setCompanyRequests] = useState<CompanyRequest[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<
-    BondRequest | SaleRequest | null
+    BondRequest | SaleRequest | CompanyRequest | null
   >(null);
   const [declineReason, setDeclineReason] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -22,7 +72,7 @@ export default function AdminDashboard() {
     null
   );
   const [isDragging, setIsDragging] = useState(false);
-  const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
+  const [activeTab, setActiveTab] = useState<"buy" | "sell" | "company">("buy");
   const [balance, setBalance] = useState(4000000000); // Initial balance
   const router = useRouter();
   const [isUpdating, setIsUpdating] = useState(false);
@@ -61,7 +111,6 @@ export default function AdminDashboard() {
   }, [buyRequests, sellRequests]);
 
   useEffect(() => {
-    // Check if there's a saved code in localStorage
     const savedCode = localStorage.getItem("adminCode");
     const savedTime = localStorage.getItem("adminCodeTime");
 
@@ -72,10 +121,9 @@ export default function AdminDashboard() {
 
     const currentTime = new Date().getTime();
     const savedTimeNum = parseInt(savedTime);
-    const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+    const fiveMinutes = 5 * 60 * 1000;
 
     if (currentTime - savedTimeNum >= fiveMinutes) {
-      // Clear expired code and redirect
       localStorage.removeItem("adminCode");
       localStorage.removeItem("adminCodeTime");
       router.push("/admin");
@@ -84,9 +132,10 @@ export default function AdminDashboard() {
 
     const fetchRequests = async () => {
       try {
-        const [buyResponse, sellResponse] = await Promise.all([
+        const [buyResponse, sellResponse, companyResponse] = await Promise.all([
           fetch("/api/admin/buyRequests"),
           fetch("/api/admin/sellRequests"),
+          fetch("/api/admin/companyRequests"),
         ]);
 
         if (buyResponse.ok) {
@@ -98,8 +147,12 @@ export default function AdminDashboard() {
           const sellData = await sellResponse.json();
           setSellRequests(sellData);
         }
+
+        if (companyResponse.ok) {
+          const companyData = await companyResponse.json();
+          setCompanyRequests(companyData);
+        }
       } catch (error) {
-        console.error("Error fetching requests:", error);
       } finally {
         setIsLoading(false);
       }
@@ -109,24 +162,22 @@ export default function AdminDashboard() {
   }, [router]);
 
   const handleStatusChange = async (
-    request: BondRequest | SaleRequest,
+    request: BondRequest | SaleRequest | CompanyRequest,
     newStatus: "pending" | "accepted" | "declined" | "normal"
   ) => {
     try {
       setIsUpdating(true);
-      // Check if it's a buy request by looking for buy request specific fields
       const isBuyRequest = "name" in request && "registration" in request;
-      const endpoint = isBuyRequest
-        ? `/api/admin/buyRequests/${request.id}`
-        : `/api/admin/sellRequests/${request.id}`;
+      const isCompanyRequest = "dugaar" in request;
 
-      console.log("Updating request:", {
-        requestId: request.id,
-        endpoint,
-        status: newStatus,
-        isBuyRequest,
-        requestType: isBuyRequest ? "buy" : "sell",
-      });
+      let endpoint = "";
+      if (isBuyRequest) {
+        endpoint = `/api/admin/buyRequests/${request.id}`;
+      } else if (isCompanyRequest) {
+        endpoint = `/api/admin/companyRequests/${request._id}`;
+      } else {
+        endpoint = `/api/admin/sellRequests/${request.id}`;
+      }
 
       const response = await fetch(endpoint, {
         method: "PATCH",
@@ -140,12 +191,6 @@ export default function AdminDashboard() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        console.error("Error response:", {
-          status: response.status,
-          statusText: response.statusText,
-          errorData,
-        });
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
@@ -153,6 +198,19 @@ export default function AdminDashboard() {
         setBuyRequests(
           buyRequests.map((r) =>
             r.id === request.id
+              ? {
+                  ...r,
+                  status: newStatus as "pending" | "accepted" | "declined",
+                  declineReason:
+                    newStatus === "declined" ? declineReason : undefined,
+                }
+              : r
+          )
+        );
+      } else if (isCompanyRequest) {
+        setCompanyRequests(
+          companyRequests.map((r) =>
+            r._id === request._id
               ? {
                   ...r,
                   status: newStatus as "pending" | "accepted" | "declined",
@@ -180,7 +238,6 @@ export default function AdminDashboard() {
       setDeclineReason("");
       toast.success("Хүсэлт амжилттай шинэчлэгдлээ");
     } catch (error) {
-      console.error("Error updating request status:", error);
       toast.error("Хүсэлт шинэчлэхэд алдаа гарлаа");
     } finally {
       setIsUpdating(false);
@@ -189,10 +246,13 @@ export default function AdminDashboard() {
 
   const handleDragStart = (
     e: React.DragEvent<HTMLDivElement>,
-    request: BondRequest | SaleRequest
+    request: RequestType
   ) => {
     setIsDragging(true);
-    e.dataTransfer.setData("requestId", request.id);
+    e.dataTransfer.setData(
+      "requestId",
+      isCompanyRequest(request) ? request._id : request.id
+    );
   };
 
   const handleDragEnd = () => {
@@ -208,21 +268,28 @@ export default function AdminDashboard() {
     newStatus: "pending" | "accepted" | "declined" | "normal"
   ) => {
     e.preventDefault();
-    if (isUpdating) return; // prevent multiple drops
+    if (isUpdating) return;
 
     const requestId = e.dataTransfer.getData("requestId");
-    const requests = activeTab === "buy" ? buyRequests : sellRequests;
-    const request = requests.find((r) => r.id === requestId);
+    const requests =
+      activeTab === "buy"
+        ? buyRequests
+        : activeTab === "sell"
+        ? sellRequests
+        : companyRequests;
+    const request = requests.find((r) =>
+      isCompanyRequest(r) ? r._id === requestId : r.id === requestId
+    );
 
     if (request && request.status !== newStatus) {
       setIsUpdating(true);
 
       if (newStatus === "declined") {
         setSelectedRequest(request);
-        setIsUpdating(false); // allow further interaction immediately
+        setIsUpdating(false);
       } else {
         await handleStatusChange(request, newStatus);
-        setIsUpdating(false); // unlock drops
+        setIsUpdating(false);
       }
     }
   };
@@ -254,8 +321,17 @@ export default function AdminDashboard() {
   };
 
   const getUserRequestCount = (email: string) => {
-    const requests = activeTab === "buy" ? buyRequests : sellRequests;
-    return requests.filter((request) => request.userEmail === email).length;
+    const requests =
+      activeTab === "buy"
+        ? buyRequests
+        : activeTab === "sell"
+        ? sellRequests
+        : companyRequests;
+    return requests.filter((request) =>
+      isCompanyRequest(request)
+        ? request.email === email
+        : request.userEmail === email
+    ).length;
   };
 
   const getRequestBackgroundColor = (email: string) => {
@@ -263,7 +339,12 @@ export default function AdminDashboard() {
   };
 
   const getRequestsByStatus = (status: string) => {
-    const requests = activeTab === "buy" ? buyRequests : sellRequests;
+    const requests =
+      activeTab === "buy"
+        ? buyRequests
+        : activeTab === "sell"
+        ? sellRequests
+        : companyRequests;
     return requests.filter((request) => request.status === status);
   };
 
@@ -280,8 +361,24 @@ export default function AdminDashboard() {
     setExpandedRequestId(expandedRequestId === requestId ? null : requestId);
   };
 
-  const renderRequestDetails = (request: BondRequest | SaleRequest) => {
-    if ("bondRequestId" in request) {
+  const renderRequestDetails = (
+    request: BondRequest | SaleRequest | CompanyRequest
+  ) => {
+    if ("dugaar" in request) {
+      // Company Request
+      return (
+        <>
+          <div className="text-sm text-gray-500">И-мэйл</div>
+          <div className="font-medium">{request.email}</div>
+          <div className="text-sm text-gray-500 mt-2">Утас</div>
+          <div className="font-medium">{request.dugaar}</div>
+          <div className="text-sm text-gray-500 mt-2">Огноо</div>
+          <div className="font-medium">
+            {format(new Date(request.createdAt), "yyyy-MM-dd HH:mm")}
+          </div>
+        </>
+      );
+    } else if ("bondRequestId" in request) {
       // Sale Request
       return (
         <>
@@ -352,6 +449,16 @@ export default function AdminDashboard() {
               >
                 Sell Requests
               </button>
+              <button
+                onClick={() => setActiveTab("company")}
+                className={`px-4 py-2 rounded-md ${
+                  activeTab === "company"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                Company Requests
+              </button>
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-sm p-4">
@@ -368,7 +475,9 @@ export default function AdminDashboard() {
         )}
 
         <div className="grid grid-cols-3 gap-6">
-          {(activeTab === "buy"
+          {(activeTab === "company"
+            ? ["pending", "accepted", "declined"]
+            : activeTab === "buy"
             ? ["pending", "accepted", "declined"]
             : ["pending", "accepted", "normal"]
           ).map((status) => (
@@ -393,14 +502,19 @@ export default function AdminDashboard() {
                   <span className="ml-2 font-medium capitalize">{status}</span>
                 </div>
                 <span className="text-sm font-medium">
-                  {getRequestsByStatus(status).length}
+                  {activeTab === "company"
+                    ? companyRequests.filter((r) => r.status === status).length
+                    : getRequestsByStatus(status).length}
                 </span>
               </div>
 
               <div className="space-y-4 min-h-[200px]">
-                {getRequestsByStatus(status).map((request) => (
+                {(activeTab === "company"
+                  ? companyRequests.filter((r) => r.status === status)
+                  : getRequestsByStatus(status)
+                ).map((request) => (
                   <motion.div
-                    key={request.id}
+                    key={isCompanyRequest(request) ? request._id : request.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
@@ -410,10 +524,21 @@ export default function AdminDashboard() {
                         handleDragStart(e, request)
                       }
                       onDragEnd={handleDragEnd}
-                      onClick={(e) => toggleRequestDetails(request.id, e)}
-                      className={`p-4 rounded-lg shadow-sm cursor-pointer transition-colors ${getRequestBackgroundColor(
-                        request.userEmail
-                      )}`}
+                      onClick={(e) =>
+                        toggleRequestDetails(
+                          isCompanyRequest(request) ? request._id : request.id,
+                          e
+                        )
+                      }
+                      className={`p-4 rounded-lg shadow-sm cursor-pointer transition-colors ${
+                        activeTab === "company"
+                          ? "bg-white"
+                          : getRequestBackgroundColor(
+                              isCompanyRequest(request)
+                                ? request.email
+                                : request.userEmail
+                            )
+                      }`}
                     >
                       {renderRequestDetails(request)}
                     </div>

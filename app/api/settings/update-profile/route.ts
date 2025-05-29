@@ -66,20 +66,13 @@ export async function POST(request: Request) {
     }
 
     // Update user
-    await db.collection("users").updateOne(
-      { email },
-      { $set: updateData }
-    );
+    await db.collection("users").updateOne({ email }, { $set: updateData });
 
     return NextResponse.json(
       { message: "Профайл амжилттай шинэчлэгдлээ" },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Profile update error:", error);
-    return NextResponse.json(
-      { error: "Алдаа гарлаа" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Алдаа гарлаа" }, { status: 500 });
   }
-} 
+}

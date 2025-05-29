@@ -33,7 +33,6 @@ export default function AdminPage() {
     setError("");
 
     try {
-      console.log("Submitting code:", code);
       const response = await fetch("/api/admin/verify", {
         method: "POST",
         headers: {
@@ -43,20 +42,17 @@ export default function AdminPage() {
       });
 
       const data = await response.json();
-      console.log("Response:", data);
 
       if (response.ok) {
         // Save the code and current time to localStorage
         localStorage.setItem("adminCode", code);
         localStorage.setItem("adminCodeTime", new Date().getTime().toString());
-        console.log("Verification successful, redirecting...");
+
         router.push("/admin/dashboard");
       } else {
-        console.log("Verification failed:", data.error);
         setError(data.error || "Invalid security code");
       }
     } catch (err) {
-      console.error("Error during verification:", err);
       setError("An error occurred. Please try again.");
     }
   };

@@ -15,10 +15,7 @@ export default function BondRequestPage() {
   const router = useRouter();
   const { user } = useAuth();
 
-  console.log("User state:", user);
-
   if (!user) {
-    console.log("No user found, redirecting to login");
     router.push("/login");
     return null;
   }
@@ -27,8 +24,6 @@ export default function BondRequestPage() {
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
-
-    console.log("Submitting with user email:", user?.email);
 
     try {
       const response = await fetch("/api/bond/request", {
@@ -47,7 +42,6 @@ export default function BondRequestPage() {
       });
 
       const data = await response.json();
-      console.log("API Response:", data);
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to submit request");
@@ -55,7 +49,6 @@ export default function BondRequestPage() {
 
       router.push("/bond/request/success");
     } catch (err) {
-      console.error("Error submitting request:", err);
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsSubmitting(false);

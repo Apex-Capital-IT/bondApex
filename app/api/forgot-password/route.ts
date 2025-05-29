@@ -65,7 +65,6 @@ export async function POST(request: Request) {
         `,
       });
     } catch (error) {
-      console.error("Failed to send email:", error);
       return NextResponse.json(
         { error: "Failed to send email" },
         { status: 500 }
@@ -77,7 +76,6 @@ export async function POST(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Forgot password error:", error);
     return NextResponse.json({ error: "Алдаа гарлаа" }, { status: 500 });
   }
 }

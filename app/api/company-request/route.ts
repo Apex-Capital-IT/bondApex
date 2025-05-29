@@ -18,11 +18,8 @@ export async function POST(request: Request) {
     const db = client.db();
 
     // Check if company already exists
-    const existingCompany = await db.collection("companyRequests").findOne({ 
-      $or: [
-        { email },
-        { dugaar }
-      ]
+    const existingCompany = await db.collection("companyRequests").findOne({
+      $or: [{ email }, { dugaar }],
     });
 
     if (existingCompany) {
@@ -41,17 +38,13 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(
-      { 
+      {
         message: "Байгууллагын хүсэлт амжилттай илгээгдлээ",
-        requestId: result.insertedId 
+        requestId: result.insertedId,
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Company request error:", error);
-    return NextResponse.json(
-      { error: "Алдаа гарлаа" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Алдаа гарлаа" }, { status: 500 });
   }
-} 
+}

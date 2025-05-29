@@ -32,10 +32,9 @@ export async function POST(request: Request) {
     }
 
     // Update user's password
-    await db.collection("users").updateOne(
-      { email },
-      { $set: { password: newPassword } }
-    );
+    await db
+      .collection("users")
+      .updateOne({ email }, { $set: { password: newPassword } });
 
     // Delete used reset record
     await db.collection("password_resets").deleteOne({ _id: resetRecord._id });
@@ -45,10 +44,6 @@ export async function POST(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Reset password error:", error);
-    return NextResponse.json(
-      { error: "Алдаа гарлаа" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Алдаа гарлаа" }, { status: 500 });
   }
-} 
+}

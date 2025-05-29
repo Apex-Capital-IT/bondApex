@@ -419,7 +419,6 @@ export default function AdminDashboard() {
             setRequests(userRequests);
           }
         } catch (error) {
-          console.error("Error fetching requests:", error);
         } finally {
           setIsLoading(false);
         }
@@ -479,7 +478,6 @@ export default function AdminDashboard() {
           setRequests(userRequests);
         }
       } catch (error) {
-        console.error("Error creating sale request:", error);
         toast.error(
           error instanceof Error
             ? error.message
@@ -532,11 +530,38 @@ export default function AdminDashboard() {
       }
     };
 
-    const calculatePayment = (amount: number, days: number) => {
+    const calculatePayment = (
+      amount: number,
+      days: number,
+      purchaseDate: string,
+      isFutureProjection: boolean = false
+    ) => {
       const annualRate = 0.19; // 19% annual rate
       const dailyRate = annualRate / 365;
-      const interest = amount * dailyRate * days;
-      return amount + interest;
+
+      if (isFutureProjection) {
+        // For future projections, use the specified days
+        const interest = amount * dailyRate * days;
+        return {
+          total: amount + interest,
+          interest: interest,
+          days: days,
+        };
+      } else {
+        // For current interest, calculate from purchase date
+        const purchaseDateTime = new Date(purchaseDate);
+        const today = new Date();
+        const daysFromPurchase = Math.floor(
+          (today.getTime() - purchaseDateTime.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        const actualDays = Math.max(daysFromPurchase, 0);
+        const interest = amount * dailyRate * actualDays;
+        return {
+          total: amount + interest,
+          interest: interest,
+          days: actualDays,
+        };
+      }
     };
 
     const handleViewChange = (
@@ -816,20 +841,40 @@ export default function AdminDashboard() {
                         </h4>
                         <div className="space-y-2">
                           {[
-                            { label: "Өнөөдөр", days: 0 },
-                            { label: "7 хоногийн дараа", days: 7 },
-                            { label: "1 сарын дараа", days: 30 },
-                            { label: "6 сарын дараа", days: 180 },
-                            { label: "1 жилийн дараа", days: 365 },
+                            { label: "Өнөөдөр", days: 0, isFuture: false },
+                            {
+                              label: "7 хоногийн дараа",
+                              days: 7,
+                              isFuture: true,
+                            },
+                            {
+                              label: "1 сарын дараа",
+                              days: 30,
+                              isFuture: true,
+                            },
+                            {
+                              label: "6 сарын дараа",
+                              days: 180,
+                              isFuture: true,
+                            },
+                            {
+                              label: "1 жилийн дараа",
+                              days: 365,
+                              isFuture: true,
+                            },
                           ].map((option) => {
                             const amount = parseFloat(
                               request.price?.replace(/[^0-9.-]+/g, "") || "0"
                             );
-                            const totalAmount = calculatePayment(
+                            const result = calculatePayment(
                               amount,
-                              option.days
+                              option.days,
+                              request.timestamp,
+                              option.isFuture
                             );
-                            const interest = totalAmount - amount;
+                            const totalAmount = result.total;
+                            const interest = result.interest;
+                            const daysFromPurchase = result.days;
 
                             return (
                               <div
@@ -843,13 +888,18 @@ export default function AdminDashboard() {
                                   <p className="text-sm text-gray-500">
                                     Хүү: {interest.toLocaleString()}₮
                                   </p>
+                                  {!option.isFuture && (
+                                    <p className="text-xs text-gray-400">
+                                      {daysFromPurchase} хоног өнгөрсөн
+                                    </p>
+                                  )}
                                 </div>
                                 <div className="text-right">
                                   <p className="font-bold text-gray-900">
                                     {totalAmount.toLocaleString()}₮
                                   </p>
                                   <p className="text-sm text-gray-500">
-                                    {option.days > 0
+                                    {option.isFuture
                                       ? `${option.days} хоног`
                                       : "Өнөөдөр"}
                                   </p>

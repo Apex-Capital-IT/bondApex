@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     // Check if email is already in use by another user
     const existingUser = await db.collection("users").findOne({
       email,
-      _id: { $ne: new ObjectId(userId) }
+      _id: { $ne: new ObjectId(userId) },
     });
 
     if (existingUser) {
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
     // Delete any existing OTPs for this user
     await db.collection("otps").deleteMany({
-      userId: new ObjectId(userId)
+      userId: new ObjectId(userId),
     });
 
     // Store OTP in database
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       userId: new ObjectId(userId),
       otp,
       expiry: otpExpiry,
-      createdAt: new Date()
+      createdAt: new Date(),
     });
 
     // Configure nodemailer with Office 365 SMTP
@@ -77,7 +77,6 @@ export async function POST(request: Request) {
         `,
       });
     } catch (error) {
-      console.error("Failed to send email:", error);
       return NextResponse.json(
         { error: "И-мэйл илгээхэд алдаа гарлаа" },
         { status: 500 }
@@ -89,10 +88,6 @@ export async function POST(request: Request) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Send OTP error:", error);
-    return NextResponse.json(
-      { error: "Алдаа гарлаа" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Алдаа гарлаа" }, { status: 500 });
   }
-} 
+}

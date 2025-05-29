@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
-import { getBondRequests } from "@/app/models/BondRequest";
+import { getCompanyRequests } from "@/app/models/CompanyRequest";
 
 export async function GET() {
   try {
-    const requests = await getBondRequests();
+    const requests = await getCompanyRequests();
     return NextResponse.json(requests);
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch bond requests" },
+      { error: "Failed to fetch company requests" },
       { status: 500 }
     );
   }

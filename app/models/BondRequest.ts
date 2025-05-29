@@ -33,7 +33,6 @@ export async function createBondRequest(request: BondRequest) {
     const result = await db.collection("bondRequests").insertOne(request);
     return result;
   } catch (error) {
-    console.error("Error creating bond request:", error);
     throw error;
   }
 }
@@ -47,7 +46,6 @@ export async function getBondRequest(id: string): Promise<BondRequest | null> {
       .findOne({ id });
     return request;
   } catch (error) {
-    console.error("Error fetching bond request:", error);
     throw error;
   }
 }
@@ -63,7 +61,6 @@ export async function getBondRequests(): Promise<BondRequest[]> {
       .toArray();
     return requests;
   } catch (error) {
-    console.error("Error fetching bond requests:", error);
     throw error;
   }
 }
@@ -75,7 +72,6 @@ export async function clearBondRequests() {
     await db.collection("bondRequests").deleteMany({});
     return true;
   } catch (error) {
-    console.error("Error clearing bond requests:", error);
     throw error;
   }
 }
@@ -97,7 +93,6 @@ export async function updateBondRequest(
       .findOne({ id });
     return updatedDoc;
   } catch (error) {
-    console.error("Error updating bond request:", error);
     throw error;
   }
 }
@@ -144,7 +139,6 @@ export async function createSaleRequest(
 
     return updatedDoc;
   } catch (error) {
-    console.error("Error creating sale request:", error);
     throw error;
   }
 }

@@ -191,7 +191,6 @@ export default function BondPage() {
         toast.error("Алдаа гарлаа. Дахин оролдоно уу");
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
       toast.error("Алдаа гарлаа. Дахин оролдоно уу");
     } finally {
       setIsRequesting(false);
@@ -428,23 +427,33 @@ export default function BondPage() {
                       <div className="flex justify-between items-center text-white">
                         <span>Хугацаа:</span>
                         <span className="font-semibold">
-                          {bond?.features.find(f => f.includes("хугацаатай"))?.match(/(\d+)/)?.[1] || "12"} сар
+                          {bond?.features
+                            .find((f) => f.includes("хугацаатай"))
+                            ?.match(/(\d+)/)?.[1] || "12"}{" "}
+                          сар
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-white mt-2">
                         <span>Хүү:</span>
                         <span className="font-semibold">
-                          {bond?.features.find(f => f.includes("хүүтэй"))?.match(/(\d+(?:\.\d+)?)/)?.[1] || "19"}%
+                          {bond?.features
+                            .find((f) => f.includes("хүүтэй"))
+                            ?.match(/(\d+(?:\.\d+)?)/)?.[1] || "19"}
+                          %
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-white mt-2">
                         <span>Төлбөрийн давтамж:</span>
                         <span className="font-semibold">
-                          {bond?.features.find(f => 
-                            f.includes("Сар тутам") || 
-                            f.includes("Улирал тутам") || 
-                            f.includes("Хагас жил тутам")
-                          )?.replace("Хагас жил тутам", "6 сар тутам") || "Сар тутам"}
+                          {bond?.features
+                            .find(
+                              (f) =>
+                                f.includes("Сар тутам") ||
+                                f.includes("Улирал тутам") ||
+                                f.includes("Хагас жил тутам")
+                            )
+                            ?.replace("Хагас жил тутам", "6 сар тутам") ||
+                            "Сар тутам"}
                         </span>
                       </div>
                     </div>
@@ -495,8 +504,10 @@ export default function BondPage() {
                               {result.tax.toLocaleString()}
                             </td>
                             <td className="p-2">
-                              {index === calculationResults.length - 1 
-                                ? Number(calculatorData.amount.replace(/,/g, "")).toLocaleString()
+                              {index === calculationResults.length - 1
+                                ? Number(
+                                    calculatorData.amount.replace(/,/g, "")
+                                  ).toLocaleString()
                                 : "0"}
                             </td>
                             <td className="p-2">

@@ -9,7 +9,10 @@ export async function POST(request: Request) {
     // Validate input
     if (!email || !otp || !userId) {
       return NextResponse.json(
-        { error: "И-мэйл хаяг, баталгаажуулах код болон хэрэглэгчийн ID шаардлагатай" },
+        {
+          error:
+            "И-мэйл хаяг, баталгаажуулах код болон хэрэглэгчийн ID шаардлагатай",
+        },
         { status: 400 }
       );
     }
@@ -23,7 +26,7 @@ export async function POST(request: Request) {
       email,
       userId: new ObjectId(userId),
       otp,
-      expiry: { $gt: new Date() }
+      expiry: { $gt: new Date() },
     });
 
     if (!otpRecord) {
@@ -34,10 +37,9 @@ export async function POST(request: Request) {
     }
 
     // Update user's email
-    const result = await db.collection("users").updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { email } }
-    );
+    const result = await db
+      .collection("users")
+      .updateOne({ _id: new ObjectId(userId) }, { $set: { email } });
 
     if (result.matchedCount === 0) {
       return NextResponse.json(
@@ -50,23 +52,18 @@ export async function POST(request: Request) {
     await db.collection("otps").deleteOne({ _id: otpRecord._id });
 
     // Get updated user data
-    const updatedUser = await db.collection("users").findOne(
-      { _id: new ObjectId(userId) },
-      { projection: { password: 0 } }
-    );
+    const updatedUser = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(userId) }, { projection: { password: 0 } });
 
     return NextResponse.json(
-      { 
+      {
         message: "И-мэйл хаяг амжилттай шинэчлэгдлээ",
-        user: updatedUser
+        user: updatedUser,
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("Verify OTP error:", error);
-    return NextResponse.json(
-      { error: "Алдаа гарлаа" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Алдаа гарлаа" }, { status: 500 });
   }
-} 
+}

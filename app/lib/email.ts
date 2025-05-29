@@ -107,9 +107,7 @@ Please check the admin dashboard for more details.
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log("Email sent successfully");
   } catch (error) {
-    console.error("Error sending email:", error);
     throw error;
   }
 }
@@ -133,37 +131,38 @@ export async function sendBondRequestStatusEmail(
 
   // Extract price information from the bond request or features
   let paymentAmount = "";
-  
+
   // First try to get the price from user input - handle possible comma formatting in the price
   if (bondRequest.price) {
     // Remove any commas and convert to number
-    const cleanPrice = bondRequest.price.toString().replace(/,/g, '');
+    const cleanPrice = bondRequest.price.toString().replace(/,/g, "");
     if (!isNaN(Number(cleanPrice))) {
       paymentAmount = cleanPrice;
     }
   }
-  
+
   // If still no valid price, extract from unit price in features
   if (!paymentAmount) {
-    const unitPriceFeature = features.find(feature => 
+    const unitPriceFeature = features.find((feature) =>
       feature.includes("Нэгж үнэ:")
     );
-    
+
     if (unitPriceFeature) {
       // Extract just the numeric part (e.g. 5000000 from "Нэгж үнэ: ₮5,000,000")
       const priceMatch = unitPriceFeature.match(/₮([0-9,]+)/);
       if (priceMatch && priceMatch[1]) {
         // Remove any commas and convert to number
-        paymentAmount = priceMatch[1].replace(/,/g, '');
+        paymentAmount = priceMatch[1].replace(/,/g, "");
       }
     }
   }
-  
+
   // Format the price for display - handle potential empty values
-  const price = paymentAmount && !isNaN(Number(paymentAmount))
-    ? new Intl.NumberFormat("mn-MN").format(Number(paymentAmount))
-    : "5,000,000"; // Default to 5,000,000 if we can't extract the price
-  
+  const price =
+    paymentAmount && !isNaN(Number(paymentAmount))
+      ? new Intl.NumberFormat("mn-MN").format(Number(paymentAmount))
+      : "5,000,000"; // Default to 5,000,000 if we can't extract the price
+
   // Create HTML for accepted request with payment details
   const acceptedHTML = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
@@ -284,12 +283,7 @@ Please contact us if you have any questions.
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log(
-      "Status update email sent successfully to:",
-      bondRequest.userEmail
-    );
   } catch (error) {
-    console.error("Error sending status update email:", error);
     throw error;
   }
 }

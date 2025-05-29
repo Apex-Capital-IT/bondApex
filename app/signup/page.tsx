@@ -53,6 +53,7 @@ export default function SignupPage() {
     otp: "",
     userType: "huvi_hun",
     dugaar: "",
+    phoneNumber: "",
   });
   const [errors, setErrors] = useState({
     lastName: "",
@@ -62,6 +63,7 @@ export default function SignupPage() {
     confirmPassword: "",
     otp: "",
     dugaar: "",
+    phoneNumber: "",
   });
   const [excelNames, setExcelNames] = useState<{
     lastName: string;
@@ -94,6 +96,7 @@ export default function SignupPage() {
         confirmPassword: "",
         otp: "",
         dugaar: !formData.dugaar ? "Дугаар оруулна уу" : "",
+        phoneNumber: "",
       };
       setErrors(newErrors);
       return !Object.values(newErrors).some((error) => error);
@@ -114,6 +117,13 @@ export default function SignupPage() {
           : "",
       otp: showOTP && !formData.otp ? "OTP код оруулна уу" : "",
       dugaar: "",
+      phoneNumber: !formData.phoneNumber
+        ? "Утасны дугаар оруулна уу"
+        : formData.phoneNumber.length !== 8
+        ? "Утасны дугаар 8 оронтой байх ёстой"
+        : !/^\d+$/.test(formData.phoneNumber)
+        ? "Утасны дугаар зөвхөн тооноос бүрдэх ёстой"
+        : "",
     };
     setErrors(newErrors);
     return !Object.values(newErrors).some((error) => error);
@@ -266,6 +276,7 @@ export default function SignupPage() {
         firstName,
         email: formData.email,
         password: formData.password,
+        phoneNumber: formData.phoneNumber,
       });
 
       if (response.status === 200) {
@@ -443,7 +454,29 @@ export default function SignupPage() {
                           </p>
                         )}
                       </div>
-
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Утасны дугаар
+                        </label>
+                        <input
+                          type="tel"
+                          name="phoneNumber"
+                          value={formData.phoneNumber}
+                          onChange={handleChange}
+                          maxLength={8}
+                          className={`w-full px-4 py-2 border ${
+                            errors.phoneNumber
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                          placeholder="Утасны дугаараа оруулна уу"
+                        />
+                        {errors.phoneNumber && (
+                          <p className="mt-1 text-sm text-red-600">
+                            {errors.phoneNumber}
+                          </p>
+                        )}
+                      </div>
                       {/* Last Name (Овог) */}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -527,6 +560,8 @@ export default function SignupPage() {
                           </p>
                         )}
                       </div>
+
+                      {/* Phone Number */}
 
                       {/* Confirm password */}
                       <div>

@@ -6,7 +6,6 @@ export async function GET() {
     const requests = await getSaleRequests();
     return NextResponse.json(requests);
   } catch (error) {
-    console.error("Error fetching sale requests:", error);
     return NextResponse.json(
       { error: "Failed to fetch sale requests" },
       { status: 500 }
@@ -39,7 +38,6 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json(updatedRequest);
   } catch (error) {
-    console.error("Error updating sale request:", error);
     return NextResponse.json(
       { error: "Failed to update sale request" },
       { status: 500 }

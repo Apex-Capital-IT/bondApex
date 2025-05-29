@@ -8,8 +8,8 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     // Then destructure as before
-    const { firstName, lastName, email, password } = body;
-    if (!firstName || !lastName || !email || !password) {
+    const { firstName, lastName, email, password, phoneNumber } = body;
+    if (!firstName || !lastName || !email || !password || !phoneNumber) {
       return NextResponse.json(
         { error: "All fields are required" },
         { status: 400 }
@@ -55,6 +55,7 @@ export async function POST(request: Request) {
     await db.collection("pending_users").insertOne({
       firstName,
       lastName,
+      phoneNumber,
       email,
       password,
       createdAt: new Date(),
@@ -114,6 +115,7 @@ export async function PUT(request: Request) {
     const result = await db.collection("users").insertOne({
       firstName: pendingUser.firstName,
       lastName: pendingUser.lastName,
+      phoneNumber: pendingUser.phoneNumber,
       email: pendingUser.email,
       password: pendingUser.password,
       createdAt: new Date(),

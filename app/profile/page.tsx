@@ -1273,7 +1273,7 @@ function NotificationSettings() {
           setRequests(userRequests);
         }
       } catch (error) {
-        console.error("Error fetching requests:", error);
+
       } finally {
         setIsLoading(false);
       }
